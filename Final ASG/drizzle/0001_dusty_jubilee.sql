@@ -1,0 +1,1 @@
+ALTER TABLE "intern_applications" ADD COLUMN "photo_url" text;

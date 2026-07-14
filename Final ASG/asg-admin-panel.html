@@ -1,0 +1,2765 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASG Admin Panel</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        /* ============================================================
+       ASG COLOR TOKENS — Exact match to provided color scheme
+       ============================================================ */
+        :root {
+            --orange-start: #FF8A00;
+            --orange-end: #FF3D00;
+            --orange-gradient: linear-gradient(180deg, #FF8A00 0%, #FF3D00 100%);
+            --orange-gradient-soft: linear-gradient(180deg, rgba(255, 138, 0, 0.2) 0%, rgba(255, 61, 0, 0.2) 100%);
+            --orange: #FF5A14;
+            --orange-mid: #FF7A2B;
+            --orange-dark: #E24200;
+            --orange-light: #FFF0E5;
+            --black: #0D0D0D;
+            --black2: #1A1A1A;
+            --gray-1: #F7F7F7;
+            --gray-2: #EDEDED;
+            --gray-3: #D4D4D4;
+            --gray-4: #9A9A9A;
+            --white: #FFFFFF;
+            --success-bg: #E8F5E9;
+            --success-text: #2E7D32;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --sidebar-width: 260px;
+            --header-height: 64px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ============================================================
+       RESET & BASE
+       ============================================================ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--gray-1);
+            color: var(--black);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        a {
+            color: var(--orange);
+            text-decoration: none;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-3);
+            border-radius: 3px;
+        }
+
+        /* ============================================================
+       LAYOUT
+       ============================================================ */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-area {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 28px 32px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ============================================================
+       SIDEBAR
+       ============================================================ */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--black);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-brand .brand-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--orange-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--white);
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand h1 {
+            font-size: 18px;
+            font-weight: 700;
+            background: var(--orange-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-brand small {
+            font-size: 11px;
+            color: var(--gray-4);
+            display: block;
+            -webkit-text-fill-color: var(--gray-4);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 0;
+        }
+
+        .sidebar-nav .nav-label {
+            padding: 16px 20px 6px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray-4);
+            font-weight: 600;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 20px;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--white);
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255, 61, 0, 0.12);
+            color: var(--white);
+            border-left-color: var(--orange-end);
+        }
+
+        .sidebar-nav a.active i {
+            color: var(--orange-end);
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar-nav a .badge {
+            margin-left: auto;
+            background: var(--orange-end);
+            color: var(--white);
+            font-size: 11px;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .sidebar-footer .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-footer .admin-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--orange-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--white);
+        }
+
+        .sidebar-footer .admin-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .sidebar-footer .admin-role {
+            font-size: 11px;
+            color: var(--gray-4);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 13px;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 61, 0, 0.2);
+            color: var(--orange-end);
+        }
+
+        /* ============================================================
+       HEADER
+       ============================================================ */
+        .top-header {
+            height: var(--header-height);
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .top-header .page-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .top-header .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .top-header .header-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-4);
+            font-size: 18px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .top-header .header-actions button:hover {
+            color: var(--black);
+        }
+
+        .top-header .header-actions .notif-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--orange-end);
+            border-radius: 50%;
+            position: absolute;
+            top: -2px;
+            right: -4px;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--black);
+        }
+
+        /* ============================================================
+       TOAST / NOTIFICATION
+       ============================================================ */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            animation: toastIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 280px;
+            max-width: 420px;
+        }
+
+        .toast.success {
+            background: var(--success-text);
+        }
+
+        .toast.error {
+            background: var(--orange-dark);
+        }
+
+        .toast.info {
+            background: var(--black);
+        }
+
+        .toast .toast-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: inherit;
+            opacity: 0.7;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        @keyframes toastIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ============================================================
+       STATS CARDS
+       ============================================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-2);
+            transition: var(--transition);
+            cursor: default;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .stat-card .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--orange-gradient-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--orange);
+            margin-bottom: 12px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--orange-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: var(--gray-4);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* ============================================================
+       CARDS & SECTIONS
+       ============================================================ */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-2);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--gray-2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--orange);
+        }
+
+        /* ============================================================
+       BUTTONS
+       ============================================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--orange-gradient);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 14px rgba(255, 61, 0, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--gray-1);
+            color: var(--black);
+            border: 1px solid var(--gray-3);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-2);
+        }
+
+        .btn-danger {
+            background: #fff0f0;
+            color: var(--orange-dark);
+            border: 1px solid #ffd4d4;
+        }
+
+        .btn-danger:hover {
+            background: #ffe0e0;
+        }
+
+        .btn-success {
+            background: var(--success-bg);
+            color: var(--success-text);
+        }
+
+        .btn-success:hover {
+            background: #c8e6c9;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-icon {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+        }
+
+        /* ============================================================
+       FORMS
+       ============================================================ */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--black);
+        }
+
+        .form-group label .required {
+            color: var(--orange-end);
+            margin-left: 2px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--gray-3);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            color: var(--black);
+            font-size: 14px;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(255, 90, 20, 0.12);
+        }
+
+        .form-control.error {
+            border-color: var(--orange-end);
+        }
+
+        .form-error {
+            color: var(--orange-end);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239A9A9A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-2);
+        }
+
+        /* ============================================================
+       TABLE
+       ============================================================ */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        table.data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-4);
+            border-bottom: 2px solid var(--gray-2);
+            background: var(--gray-1);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        table.data-table th:hover {
+            color: var(--black);
+        }
+
+        table.data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-2);
+            vertical-align: middle;
+        }
+
+        table.data-table tr:hover {
+            background: var(--orange-light);
+        }
+
+        table.data-table .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* ============================================================
+       BADGES / STATUS
+       ============================================================ */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-active,
+        .badge-current,
+        .badge-published,
+        .badge-reviewed {
+            background: var(--success-bg);
+            color: var(--success-text);
+        }
+
+        .badge-upcoming,
+        .badge-draft,
+        .badge-pending {
+            background: var(--orange-light);
+            color: var(--orange-mid);
+        }
+
+        .badge-past,
+        .badge-rejected {
+            background: #fbe9e7;
+            color: #bf360c;
+        }
+
+        .badge-accepted {
+            background: var(--success-bg);
+            color: var(--success-text);
+        }
+
+        /* ============================================================
+       FILTER BAR
+       ============================================================ */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-bar .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 9px 14px 9px 36px;
+            border: 1.5px solid var(--gray-3);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .filter-bar .search-input:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(255, 90, 20, 0.12);
+        }
+
+        .filter-bar .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-bar .search-wrap i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-4);
+        }
+
+        .filter-bar select {
+            padding: 9px 14px;
+            border: 1.5px solid var(--gray-3);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            font-size: 14px;
+            outline: none;
+        }
+
+        /* ============================================================
+       GALLERY GRID
+       ============================================================ */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: var(--gray-2);
+            aspect-ratio: 1;
+            cursor: grab;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover {
+            border-color: var(--orange);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            padding: 8px 12px;
+            color: var(--white);
+            font-size: 12px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+
+        .gallery-item .gallery-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover .gallery-actions {
+            opacity: 1;
+        }
+
+        .gallery-item .gallery-actions button {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--white);
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gallery-item .gallery-actions button:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .gallery-item.dragging {
+            opacity: 0.5;
+            border-color: var(--orange-end);
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--gray-3);
+            border-radius: var(--radius-sm);
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--gray-1);
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--orange);
+            background: var(--orange-light);
+        }
+
+        .upload-zone i {
+            font-size: 40px;
+            color: var(--gray-4);
+            margin-bottom: 12px;
+        }
+
+        .upload-zone p {
+            color: var(--gray-4);
+            font-size: 14px;
+        }
+
+        /* ============================================================
+       MODAL
+       ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 620px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.25s ease;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-header .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--gray-4);
+            transition: var(--transition);
+        }
+
+        .modal-header .modal-close:hover {
+            color: var(--black);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* ============================================================
+       RICH TEXT SIMULATION
+       ============================================================ */
+        .rich-toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 8px 12px;
+            background: var(--gray-1);
+            border: 1.5px solid var(--gray-3);
+            border-bottom: none;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            flex-wrap: wrap;
+        }
+
+        .rich-toolbar button {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--gray-4);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .rich-toolbar button:hover {
+            background: var(--gray-2);
+            color: var(--black);
+        }
+
+        .rich-editor {
+            min-height: 200px;
+            padding: 14px;
+            border: 1.5px solid var(--gray-3);
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+            outline: none;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .rich-editor:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(255, 90, 20, 0.12);
+        }
+
+        /* ============================================================
+       ACTIVITY FEED
+       ============================================================ */
+        .activity-feed {
+            list-style: none;
+        }
+
+        .activity-feed li {
+            display: flex;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-2);
+        }
+
+        .activity-feed li:last-child {
+            border-bottom: none;
+        }
+
+        .activity-feed .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--orange-gradient-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--orange);
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .activity-feed .activity-content p {
+            font-size: 14px;
+            color: var(--black);
+        }
+
+        .activity-feed .activity-content small {
+            font-size: 12px;
+            color: var(--gray-4);
+        }
+
+        /* ============================================================
+       QUICK ACTIONS
+       ============================================================ */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .quick-action-btn {
+            padding: 16px 12px;
+            background: var(--gray-1);
+            border: 1px solid var(--gray-2);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            text-align: center;
+            transition: var(--transition);
+            color: var(--black);
+        }
+
+        .quick-action-btn:hover {
+            background: var(--orange-gradient-soft);
+            border-color: var(--orange);
+            transform: translateY(-2px);
+        }
+
+        .quick-action-btn i {
+            font-size: 22px;
+            color: var(--orange);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .quick-action-btn span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ============================================================
+       MEMBER CARDS
+       ============================================================ */
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .member-card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-2);
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            transition: var(--transition);
+        }
+
+        .member-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .member-card .member-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--orange-gradient-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--orange);
+            flex-shrink: 0;
+        }
+
+        .member-card .member-info h4 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .member-card .member-info .role {
+            font-size: 13px;
+            color: var(--orange-mid);
+            font-weight: 500;
+        }
+
+        .member-card .member-info p {
+            font-size: 13px;
+            color: var(--gray-4);
+            margin-top: 4px;
+        }
+
+        .member-card .member-info .social-links {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .member-card .member-info .social-links a {
+            color: var(--gray-4);
+            font-size: 14px;
+        }
+
+        .member-card .member-info .social-links a:hover {
+            color: var(--orange);
+        }
+
+        /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 20px;
+            }
+
+            .top-header {
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+            }
+
+            .main-area {
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-bar .search-wrap {
+                min-width: auto;
+            }
+
+            .member-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+
+        /* ============================================================
+       EMPTY STATE
+       ============================================================ */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray-4);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            color: var(--gray-3);
+        }
+
+        .empty-state h4 {
+            color: var(--black);
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        /* ============================================================
+       LOADING / SKELETON
+       ============================================================ */
+        .skeleton {
+            background: linear-gradient(90deg, var(--gray-2) 25%, var(--gray-1) 50%, var(--gray-2) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-sm);
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ============================================================
+       SWITCH TOGGLE
+       ============================================================ */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--gray-3);
+            border-radius: 22px;
+            transition: var(--transition);
+        }
+
+        .switch .slider::before {
+            content: '';
+            position: absolute;
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background: var(--white);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .switch input:checked+.slider {
+            background: var(--orange-gradient);
+        }
+
+        .switch input:checked+.slider::before {
+            transform: translateX(18px);
+        }
+
+        /* ============================================================
+       CATEGORY & TAG CHIPS
+       ============================================================ */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--orange-gradient-soft);
+            color: var(--orange-dark);
+        }
+
+        .chip .chip-remove {
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .chip .chip-remove:hover {
+            opacity: 1;
+        }
+
+        /* ============================================================
+       MISC
+       ============================================================ */
+        .text-muted {
+            color: var(--gray-4);
+        }
+
+        .text-gradient {
+            background: var(--orange-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .mt-2 {
+            margin-top: 8px;
+        }
+
+        .mt-4 {
+            margin-top: 16px;
+        }
+
+        .mb-4 {
+            margin-bottom: 16px;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-center {
+            align-items: center;
+        }
+
+        .gap-2 {
+            gap: 8px;
+        }
+
+        .gap-3 {
+            gap: 12px;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="react">
+        /** @jsx React.createElement */
+        const { useState, useEffect, useRef, useCallback, createContext, useContext, Fragment } = React;
+        const { createRoot } = ReactDOM;
+
+        /* ============================================================
+           Mock Data — Simulates a real database
+           ============================================================ */
+        const MOCK_DATA = {
+            events: [
+                { id: 1, title: 'Startup Pitch Night', description: 'Join us for an exciting pitch competition where founders present to investors.', date: '2026-05-15', time: '18:00', location: 'ASG Hub, San Francisco', image: '', registrationLink: 'https://example.com/register/1', status: 'upcoming', createdAt: '2026-04-01T10:00:00Z' },
+                { id: 2, title: 'Founders Meetup Q2', description: 'Quarterly networking event for ASG founders and mentors.', date: '2026-04-20', time: '14:00', location: 'Online via Zoom', image: '', registrationLink: '', status: 'active', createdAt: '2026-03-15T08:30:00Z' },
+                { id: 3, title: 'AI Workshop Series', description: 'Hands-on workshop on integrating AI into your startup workflow.', date: '2026-03-01', time: '10:00', location: 'ASG Lab, NYC', image: '', registrationLink: '', status: 'past', createdAt: '2026-02-01T09:00:00Z' },
+            ],
+            gallery: [
+                { id: 1, title: 'Team Offsite 2026', description: 'Annual team building event', tags: ['team', 'event'], url: 'https://picsum.photos/seed/g1/400/400' },
+                { id: 2, title: 'Demo Day', description: 'Startup demo presentations', tags: ['demo', 'startup'], url: 'https://picsum.photos/seed/g2/400/400' },
+                { id: 3, title: 'Workshop Session', description: 'AI workshop in action', tags: ['workshop', 'ai'], url: 'https://picsum.photos/seed/g3/400/400' },
+                { id: 4, title: 'Networking Event', description: 'Founders connecting', tags: ['networking'], url: 'https://picsum.photos/seed/g4/400/400' },
+                { id: 5, title: 'Office Space', description: 'Our new headquarters', tags: ['office'], url: 'https://picsum.photos/seed/g5/400/400' },
+                { id: 6, title: 'Mentor Session', description: 'One-on-one mentoring', tags: ['mentor'], url: 'https://picsum.photos/seed/g6/400/400' },
+            ],
+            members: [
+                { id: 1, name: 'Alex Johnson', role: 'CEO & Founder', position: 'Executive', bio: 'Serial entrepreneur with 15+ years in tech.', photo: '', social: { linkedin: '#', twitter: '#' }, joinDate: '2024-01-15', status: 'current' },
+                { id: 2, name: 'Sarah Chen', role: 'CTO', position: 'Executive', bio: 'Former engineer at Google, passionate about AI.', photo: '', social: { linkedin: '#', twitter: '#' }, joinDate: '2024-02-01', status: 'current' },
+                { id: 3, name: 'Mike Rivera', role: 'Lead Mentor', position: 'Mentor', bio: 'VC partner with deep startup experience.', photo: '', social: { linkedin: '#', twitter: '#' }, joinDate: '2024-01-20', status: 'current' },
+                { id: 4, name: 'Emily Park', role: 'Marketing Lead', position: 'Marketing', bio: 'Growth strategist and content creator.', photo: '', social: { linkedin: '#', twitter: '#' }, joinDate: '2024-03-01', status: 'current' },
+                { id: 5, name: 'David Kim', role: 'Software Engineer Intern', position: 'Intern', bio: 'CS student at Stanford, full-stack developer.', photo: '', social: { linkedin: '#', twitter: '#' }, joinDate: '2025-09-01', status: 'current' },
+                { id: 6, name: 'Lisa Thompson', role: 'Design Intern', position: 'Intern', bio: 'UX design student passionate about product design.', photo: '', social: { linkedin: '#', twitter: '#' }, joinDate: '2025-09-01', status: 'past' },
+            ],
+            posts: [
+                { id: 1, title: 'How AI is Transforming Startups', content: 'Artificial intelligence is reshaping how startups operate, from customer service to product development...', featuredImage: '', category: 'Technology', tags: ['AI', 'startups', 'innovation'], author: 'Alex Johnson', publishDate: '2026-04-10', status: 'published', createdAt: '2026-04-08T10:00:00Z' },
+                { id: 2, title: 'Top 5 Funding Trends in 2026', content: 'We analyze the latest funding trends and what they mean for early-stage startups...', featuredImage: '', category: 'Funding', tags: ['funding', 'venture capital', 'trends'], author: 'Sarah Chen', publishDate: '2026-04-05', status: 'published', createdAt: '2026-04-03T08:00:00Z' },
+                { id: 3, title: 'Announcing Our New Mentorship Program', content: 'We are excited to launch our expanded mentorship program for batch 2026...', featuredImage: '', category: 'Announcements', tags: ['mentorship', 'program'], author: 'Mike Rivera', publishDate: '', status: 'draft', createdAt: '2026-04-12T14:00:00Z' },
+            ],
+            applications: [
+                { id: 1, name: 'John Smith', email: 'john@example.com', position: 'Startup Founder Application', submittedDate: '2026-04-12', status: 'pending' },
+                { id: 2, name: 'Jane Doe', email: 'jane@example.com', position: 'Mentor Application', submittedDate: '2026-04-10', status: 'reviewed' },
+                { id: 3, name: 'Bob Wilson', email: 'bob@example.com', position: 'Internship Application', submittedDate: '2026-04-08', status: 'accepted' },
+                { id: 4, name: 'Alice Brown', email: 'alice@example.com', position: 'Startup Founder Application', submittedDate: '2026-04-05', status: 'rejected' },
+                { id: 5, name: 'Tom Harris', email: 'tom@example.com', position: 'Internship Application', submittedDate: '2026-04-14', status: 'pending' },
+            ],
+            categories: ['Technology', 'Funding', 'Announcements', 'Community', 'Events'],
+            tags: ['AI', 'startups', 'innovation', 'funding', 'venture capital', 'trends', 'mentorship', 'program', 'community'],
+        };
+
+        /* ============================================================
+           Toast / Notification Context
+           ============================================================ */
+        const ToastContext = React.createContext();
+
+        function ToastProvider({ children }) {
+            const [toasts, setToasts] = useState([]);
+            const addToast = useCallback((message, type = 'info') => {
+                const id = Date.now() + Math.random();
+                setToasts(prev => [...prev, { id, message, type }]);
+                setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
+            }, []);
+            const removeToast = useCallback((id) => {
+                setToasts(prev => prev.filter(t => t.id !== id));
+            }, []);
+            return (
+                <ToastContext.Provider value={addToast}>
+                    {children}
+                    <div className="toast-container">
+                        {toasts.map(t => (
+                            <div key={t.id} className={`toast ${t.type}`}>
+                                <i className={`fas ${t.type === 'success' ? 'fa-check-circle' : t.type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}`}></i>
+                                {t.message}
+                                <button className="toast-close" onClick={() => removeToast(t.id)}>&times;</button>
+                            </div>
+                        ))}
+                    </div>
+                </ToastContext.Provider>
+            );
+        }
+
+        function useToast() {
+            return useContext(ToastContext);
+        }
+
+        /* ============================================================
+           Modal Component
+           ============================================================ */
+        function Modal({ isOpen, onClose, title, children }) {
+            if (!isOpen) return null;
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>{title}</h2>
+                            <button className="modal-close" onClick={onClose}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        /* ============================================================
+           Confirm Modal
+           ============================================================ */
+        function ConfirmModal({ isOpen, onClose, onConfirm, title, message }) {
+            if (!isOpen) return null;
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" style={{ maxWidth: 420 }} onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 style={{ color: 'var(--orange-dark)' }}>{title || 'Confirm'}</h2>
+                            <button className="modal-close" onClick={onClose}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <p style={{ marginBottom: 20 }}>{message || 'Are you sure?'}</p>
+                            <div className="form-actions">
+                                <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                                <button className="btn btn-danger" onClick={() => { onConfirm(); onClose(); }}>Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        /* ============================================================
+           Form Validation Helpers
+           ============================================================ */
+        function validateRequired(value, label) {
+            if (!value || (typeof value === 'string' && !value.trim())) return `${label} is required`;
+            return null;
+        }
+
+        function validateEmail(value) {
+            if (!value) return null;
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email address';
+            return null;
+        }
+
+        /* ============================================================
+           ============================================================
+           SIDEBAR
+           ============================================================ */
+        const NAV_ITEMS = [
+            { key: 'dashboard', label: 'Dashboard', icon: 'fa-chart-pie' },
+            { key: 'events', label: 'Events', icon: 'fa-calendar-alt' },
+            { key: 'gallery', label: 'Gallery', icon: 'fa-images' },
+            { key: 'members', label: 'Members & Interns', icon: 'fa-users' },
+            { key: 'blog', label: 'Blog', icon: 'fa-blog' },
+            { key: 'applications', label: 'Applications', icon: 'fa-file-alt' },
+        ];
+
+        function Sidebar({ activeTab, onNavigate, isOpen, onClose, pendingCount }) {
+            return (
+                <>
+                    {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
+                    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+                        <div className="sidebar-brand">
+                            <div className="brand-dot">AS</div>
+                            <div>
+                                <h1>ASG Admin</h1>
+                                <small>Control Panel</small>
+                            </div>
+                        </div>
+                        <nav className="sidebar-nav">
+                            <div className="nav-label">Main</div>
+                            {NAV_ITEMS.map(item => (
+                                <a key={item.key}
+                                    className={activeTab === item.key ? 'active' : ''}
+                                    onClick={() => { onNavigate(item.key); onClose && onClose(); }}>
+                                    <i className={`fas ${item.icon}`}></i>
+                                    {item.label}
+                                    {item.key === 'applications' && pendingCount > 0 && (
+                                        <span className="badge">{pendingCount}</span>
+                                    )}
+                                </a>
+                            ))}
+                        </nav>
+                        <div className="sidebar-footer">
+                            <div className="admin-info">
+                                <div className="admin-avatar">AD</div>
+                                <div>
+                                    <div className="admin-name">Admin User</div>
+                                    <div className="admin-role">Super Admin</div>
+                                </div>
+                            </div>
+                            <button className="logout-btn" onClick={() => alert('Logged out successfully!')}>
+                                <i className="fas fa-sign-out-alt"></i> Sign Out
+                            </button>
+                        </div>
+                    </aside>
+                </>
+            );
+        }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
+        function Header({ title, onToggleSidebar }) {
+            return (
+                <header className="top-header">
+                    <div className="flex flex-center gap-3">
+                        <button className="sidebar-toggle" onClick={onToggleSidebar}>
+                            <i className="fas fa-bars"></i>
+                        </button>
+                        <h2 className="page-title">{title}</h2>
+                    </div>
+                    <div className="header-actions">
+                        <button>
+                            <i className="fas fa-bell"></i>
+                            <span className="notif-dot"></span>
+                        </button>
+                        <button title="Settings"><i className="fas fa-cog"></i></button>
+                    </div>
+                </header>
+            );
+        }
+
+        /* ============================================================
+           ============================================================
+           DASHBOARD VIEW
+           ============================================================ */
+        function DashboardView({ data }) {
+            const toast = useToast();
+            const pendingApps = data.applications.filter(a => a.status === 'pending').length;
+            const recentActivities = [
+                { icon: 'fa-calendar-alt', text: 'New event "Startup Pitch Night" created', time: '2 hours ago' },
+                { icon: 'fa-user-plus', text: 'New application received from Tom Harris', time: '3 hours ago' },
+                { icon: 'fa-blog', text: 'Blog post "How AI is Transforming Startups" published', time: '1 day ago' },
+                { icon: 'fa-images', text: '5 new images added to gallery', time: '2 days ago' },
+                { icon: 'fa-users', text: 'David Kim joined as Software Engineer Intern', time: '3 days ago' },
+            ];
+
+            return (
+                <div>
+                    {/* Stats */}
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-icon"><i className="fas fa-calendar-alt"></i></div>
+                            <div className="stat-value">{data.events.length}</div>
+                            <div className="stat-label">Total Events</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon"><i className="fas fa-blog"></i></div>
+                            <div className="stat-value">{data.posts.length}</div>
+                            <div className="stat-label">Blog Posts</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon"><i className="fas fa-images"></i></div>
+                            <div className="stat-value">{data.gallery.length}</div>
+                            <div className="stat-label">Gallery Images</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon"><i className="fas fa-users"></i></div>
+                            <div className="stat-value">{data.members.length}</div>
+                            <div className="stat-label">Members & Interns</div>
+                        </div>
+                        <div className="stat-card" style={{ borderColor: pendingApps > 0 ? 'var(--orange-end)' : undefined }}>
+                            <div className="stat-icon" style={{ background: pendingApps > 0 ? 'rgba(255,61,0,0.15)' : undefined }}>
+                                <i className="fas fa-file-alt"></i>
+                            </div>
+                            <div className="stat-value">{pendingApps}</div>
+                            <div className="stat-label">Pending Applications</div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28 }}>
+                        {/* Quick Actions */}
+                        <div className="card">
+                            <div className="card-header">
+                                <h3><i className="fas fa-bolt" style={{ color: 'var(--orange)' }}></i> Quick Actions</h3>
+                            </div>
+                            <div className="card-body">
+                                <div className="quick-actions">
+                                    <button className="quick-action-btn" onClick={() => alert('Create Event form opened')}>
+                                        <i className="fas fa-calendar-plus"></i>
+                                        <span>New Event</span>
+                                    </button>
+                                    <button className="quick-action-btn" onClick={() => alert('Upload images dialog opened')}>
+                                        <i className="fas fa-upload"></i>
+                                        <span>Upload Images</span>
+                                    </button>
+                                    <button className="quick-action-btn" onClick={() => alert('New Blog Post editor opened')}>
+                                        <i className="fas fa-pen-fancy"></i>
+                                        <span>Write Post</span>
+                                    </button>
+                                    <button className="quick-action-btn" onClick={() => alert('Add Member form opened')}>
+                                        <i className="fas fa-user-plus"></i>
+                                        <span>Add Member</span>
+                                    </button>
+                                    <button className="quick-action-btn" onClick={() => alert('Reviewing pending applications...')}>
+                                        <i className="fas fa-check-double"></i>
+                                        <span>Review Apps</span>
+                                        {pendingApps > 0 && <span className="badge badge-pending" style={{ marginTop: 4 }}>{pendingApps} pending</span>}
+                                    </button>
+                                    <button className="quick-action-btn" onClick={() => alert('Exporting data...')}>
+                                        <i className="fas fa-download"></i>
+                                        <span>Export Data</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Activity */}
+                        <div className="card">
+                            <div className="card-header">
+                                <h3><i className="fas fa-history" style={{ color: 'var(--orange)' }}></i> Recent Activity</h3>
+                            </div>
+                            <div className="card-body" style={{ padding: '8px 24px' }}>
+                                <ul className="activity-feed">
+                                    {recentActivities.map((act, i) => (
+                                        <li key={i}>
+                                            <div className="activity-icon"><i className={`fas ${act.icon}`}></i></div>
+                                            <div className="activity-content">
+                                                <p>{act.text}</p>
+                                                <small>{act.time}</small>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Alerts */}
+                    {pendingApps > 0 && (
+                        <div className="card" style={{ borderLeft: '4px solid var(--orange-end)', background: 'var(--orange-light)' }}>
+                            <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <i className="fas fa-exclamation-triangle" style={{ color: 'var(--orange)', fontSize: 20 }}></i>
+                                <div>
+                                    <strong>{pendingApps} pending application{pendingApps > 1 ? 's' : ''}</strong> require your review.
+                                    <span style={{ color: 'var(--gray-4)', marginLeft: 8, cursor: 'pointer' }}>Go to Applications →</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        /* ============================================================
+           ============================================================
+           EVENTS VIEW
+           ============================================================ */
+        function EventsView({ events, onAdd, onUpdate, onDelete }) {
+            const toast = useToast();
+            const [search, setSearch] = useState('');
+            const [filterStatus, setFilterStatus] = useState('all');
+            const [sortBy, setSortBy] = useState('date');
+            const [showForm, setShowForm] = useState(false);
+            const [editItem, setEditItem] = useState(null);
+            const [confirmDelete, setConfirmDelete] = useState(null);
+            const [form, setForm] = useState({ title: '', description: '', date: '', time: '', location: '', image: '', registrationLink: '', status: 'upcoming' });
+            const [errors, setErrors] = useState({});
+
+            const openCreate = () => {
+                setEditItem(null);
+                setForm({ title: '', description: '', date: '', time: '', location: '', image: '', registrationLink: '', status: 'upcoming' });
+                setErrors({});
+                setShowForm(true);
+            };
+
+            const openEdit = (item) => {
+                setEditItem(item);
+                setForm({ ...item });
+                setErrors({});
+                setShowForm(true);
+            };
+
+            const validateForm = () => {
+                const errs = {};
+                const t = validateRequired(form.title, 'Title');
+                if (t) errs.title = t;
+                const d = validateRequired(form.date, 'Date');
+                if (d) errs.date = d;
+                const l = validateRequired(form.location, 'Location');
+                if (l) errs.location = l;
+                setErrors(errs);
+                return Object.keys(errs).length === 0;
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!validateForm()) return;
+                if (editItem) {
+                    onUpdate({ ...editItem, ...form });
+                    toast('Event updated successfully!', 'success');
+                } else {
+                    onAdd({ ...form, id: Date.now(), createdAt: new Date().toISOString() });
+                    toast('Event created successfully!', 'success');
+                }
+                setShowForm(false);
+            };
+
+            const toggleStatus = (item) => {
+                const statusMap = { active: 'upcoming', upcoming: 'past', past: 'active' };
+                onUpdate({ ...item, status: statusMap[item.status] });
+                toast(`Event status changed to ${statusMap[item.status]}`, 'info');
+            };
+
+            let filtered = events.filter(e => {
+                if (search && !e.title.toLowerCase().includes(search.toLowerCase())) return false;
+                if (filterStatus !== 'all' && e.status !== filterStatus) return false;
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                if (sortBy === 'date') return new Date(b.date) - new Date(a.date);
+                if (sortBy === 'title') return a.title.localeCompare(b.title);
+                return 0;
+            });
+
+            return (
+                <div>
+                    <div className="flex flex-center" style={{ justifyContent: 'space-between', marginBottom: 20 }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 700 }}>All Events</h3>
+                        <button className="btn btn-primary" onClick={openCreate}>
+                            <i className="fas fa-plus"></i> Create Event
+                        </button>
+                    </div>
+
+                    <div className="filter-bar">
+                        <div className="search-wrap">
+                            <i className="fas fa-search"></i>
+                            <input className="search-input" placeholder="Search events..." value={search} onChange={e => setSearch(e.target.value)} />
+                        </div>
+                        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="past">Past</option>
+                        </select>
+                        <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                            <option value="date">Sort by Date</option>
+                            <option value="title">Sort by Title</option>
+                        </select>
+                    </div>
+
+                    <div className="card">
+                        <div className="table-container">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Date</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Visible</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.length === 0 && (
+                                        <tr><td colSpan="6" style={{ textAlign: 'center', padding: 40, color: 'var(--gray-4)' }}>No events found</td></tr>
+                                    )}
+                                    {filtered.map(e => (
+                                        <tr key={e.id}>
+                                            <td><strong>{e.title}</strong></td>
+                                            <td>{new Date(e.date).toLocaleDateString()} {e.time}</td>
+                                            <td>{e.location}</td>
+                                            <td><span className={`badge badge-${e.status}`}>{e.status}</span></td>
+                                            <td>
+                                                <label className="switch">
+                                                    <input type="checkbox" checked={e.status !== 'past'} onChange={() => toggleStatus(e)} />
+                                                    <span className="slider"></span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <div className="actions">
+                                                    <button className="btn btn-secondary btn-sm" onClick={() => openEdit(e)}><i className="fas fa-edit"></i></button>
+                                                    <button className="btn btn-danger btn-sm" onClick={() => setConfirmDelete(e)}><i className="fas fa-trash"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Create/Edit Modal */}
+                    <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editItem ? 'Edit Event' : 'Create New Event'}>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label>Event Title <span className="required">*</span></label>
+                                <input className={`form-control ${errors.title ? 'error' : ''}`} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Enter event title" />
+                                {errors.title && <div className="form-error">{errors.title}</div>}
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Date <span className="required">*</span></label>
+                                    <input type="date" className={`form-control ${errors.date ? 'error' : ''}`} value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+                                    {errors.date && <div className="form-error">{errors.date}</div>}
+                                </div>
+                                <div className="form-group">
+                                    <label>Time</label>
+                                    <input type="time" className="form-control" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label>Location <span className="required">*</span></label>
+                                <input className={`form-control ${errors.location ? 'error' : ''}`} value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Event location" />
+                                {errors.location && <div className="form-error">{errors.location}</div>}
+                            </div>
+                            <div className="form-group">
+                                <label>Description</label>
+                                <textarea className="form-control" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Event description" rows={3} />
+                            </div>
+                            <div className="form-group">
+                                <label>Cover Image URL</label>
+                                <input className="form-control" value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="https://example.com/image.jpg" />
+                            </div>
+                            <div className="form-group">
+                                <label>Registration Link</label>
+                                <input className="form-control" value={form.registrationLink} onChange={e => setForm({ ...form, registrationLink: e.target.value })} placeholder="https://example.com/register" />
+                            </div>
+                            <div className="form-group">
+                                <label>Status</label>
+                                <select className="form-control" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+                                    <option value="active">Active</option>
+                                    <option value="upcoming">Upcoming</option>
+                                    <option value="past">Past</option>
+                                </select>
+                            </div>
+                            <div className="form-actions">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                                <button type="submit" className="btn btn-primary">{editItem ? 'Update Event' : 'Create Event'}</button>
+                            </div>
+                        </form>
+                    </Modal>
+
+                    <ConfirmModal isOpen={!!confirmDelete} onClose={() => setConfirmDelete(null)}
+                        onConfirm={() => { onDelete(confirmDelete.id); toast('Event deleted', 'success'); }}
+                        title="Delete Event" message={`Are you sure you want to delete "${confirmDelete?.title}"?`} />
+                </div>
+            );
+        }
+
+        /* ============================================================
+           ============================================================
+           GALLERY VIEW
+           ============================================================ */
+        function GalleryView({ gallery, onAdd, onDelete, onReorder }) {
+            const toast = useToast();
+            const [showForm, setShowForm] = useState(false);
+            const [editItem, setEditItem] = useState(null);
+            const [confirmDelete, setConfirmDelete] = useState(null);
+            const [form, setForm] = useState({ title: '', description: '', tags: '', url: '' });
+            const [errors, setErrors] = useState({});
+            const [items, setItems] = useState(gallery);
+            const [dragIdx, setDragIdx] = useState(null);
+            const fileInputRef = useRef(null);
+
+            useEffect(() => setItems(gallery), [gallery]);
+
+            const openUpload = () => {
+                setEditItem(null);
+                setForm({ title: '', description: '', tags: '', url: '' });
+                setErrors({});
+                setShowForm(true);
+            };
+
+            const handleFileSelect = (e) => {
+                const files = e.target.files;
+                if (!files.length) return;
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const url = ev.target.result;
+                        onAdd({ id: Date.now() + Math.random(), title: file.name.split('.')[0] || 'Untitled', description: '', tags: [], url });
+                    };
+                    reader.readAsDataURL(file);
+                });
+                toast(`${files.length} image(s) uploaded!`, 'success');
+                e.target.value = '';
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const errs = {};
+                if (!form.title.trim()) errs.title = 'Title is required';
+                if (!form.url.trim() && !editItem) errs.url = 'Image URL is required';
+                setErrors(errs);
+                if (Object.keys(errs).length) return;
+
+                if (editItem) {
+                    // Update not implemented in parent for gallery, but we'll handle it
+                    toast('Image updated!', 'success');
+                    setShowForm(false);
+                } else {
+                    onAdd({ id: Date.now(), title: form.title, description: form.description, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean), url: form.url });
+                    toast('Image added to gallery!', 'success');
+                    setShowForm(false);
+                }
+            };
+
+            const handleDragStart = (idx) => { setDragIdx(idx); };
+            const handleDragOver = (e, idx) => {
+                e.preventDefault();
+                if (dragIdx === null || dragIdx === idx) return;
+                const newItems = [...items];
+                const [moved] = newItems.splice(dragIdx, 1);
+                newItems.splice(idx, 0, moved);
+                setItems(newItems);
+                setDragIdx(idx);
+            };
+            const handleDragEnd = () => {
+                setDragIdx(null);
+                onReorder(items);
+            };
+
+            return (
+                <div>
+                    <div className="flex flex-center" style={{ justifyContent: 'space-between', marginBottom: 20 }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 700 }}>Gallery</h3>
+                        <button className="btn btn-primary" onClick={openUpload}>
+                            <i className="fas fa-plus"></i> Add Image
+                        </button>
+                    </div>
+
+                    {/* Upload Zone */}
+                    <div className="upload-zone mb-4" onClick={() => fileInputRef.current?.click()}
+                        onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('dragover'); }}
+                        onDragLeave={e => e.currentTarget.classList.remove('dragover')}
+                        onDrop={e => { e.preventDefault(); e.currentTarget.classList.remove('dragover'); const files = e.dataTransfer.files; if (files.length) { /* reuse handler */ fileInputRef.current.files = files; handleFileSelect({ target: fileInputRef.current }); } }}>
+                        <i className="fas fa-cloud-upload-alt"></i>
+                        <p><strong>Click to upload</strong> or drag and drop images here</p>
+                        <p className="text-muted" style={{ fontSize: 13, marginTop: 4 }}>PNG, JPG, WebP up to 10MB</p>
+                        <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileSelect} />
+                    </div>
+
+                    {/* Gallery Grid */}
+                    <div className="gallery-grid">
+                        {items.length === 0 && (
+                            <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+                                <i className="fas fa-images"></i>
+                                <h4>No images yet</h4>
+                                <p>Upload your first image to get started</p>
+                            </div>
+                        )}
+                        {items.map((img, idx) => (
+                            <div key={img.id}
+                                className={`gallery-item ${dragIdx === idx ? 'dragging' : ''}`}
+                                draggable
+                                onDragStart={() => handleDragStart(idx)}
+                                onDragOver={(e) => handleDragOver(e, idx)}
+                                onDragEnd={handleDragEnd}>
+                                <img src={img.url} alt={img.title} />
+                                <div className="gallery-overlay">
+                                    <strong>{img.title}</strong>
+                                    {img.tags?.length > 0 && <div style={{ fontSize: 10, opacity: 0.8 }}>{img.tags.join(', ')}</div>}
+                                </div>
+                                <div className="gallery-actions">
+                                    <button title="Delete" onClick={() => setConfirmDelete(img)}><i className="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Add Image Modal */}
+                    <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Add Image to Gallery">
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label>Title <span className="required">*</span></label>
+                                <input className={`form-control ${errors.title ? 'error' : ''}`} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Image title" />
+                                {errors.title && <div className="form-error">{errors.title}</div>}
+                            </div>
+                            <div className="form-group">
+                                <label>Image URL <span className="required">*</span></label>
+                                <input className={`form-control ${errors.url ? 'error' : ''}`} value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://example.com/image.jpg" />
+                                {errors.url && <div className="form-error">{errors.url}</div>}
+                            </div>
+                            <div className="form-group">
+                                <label>Description</label>
+                                <textarea className="form-control" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Image description" rows={2} />
+                            </div>
+                            <div className="form-group">
+                                <label>Tags (comma separated)</label>
+                                <input className="form-control" value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="event, team, workshop" />
+                            </div>
+                            <div className="form-actions">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                                <button type="submit" className="btn btn-primary">Add to Gallery</button>
+                            </div>
+                        </form>
+                    </Modal>
+
+                    <ConfirmModal isOpen={!!confirmDelete} onClose={() => setConfirmDelete(null)}
+                        onConfirm={() => { onDelete(confirmDelete.id); toast('Image deleted', 'success'); }}
+                        title="Delete Image" message={`Remove "${confirmDelete?.title}" from gallery?`} />
+                </div>
+            );
+        }
+
+        /* ============================================================
+           ============================================================
+           MEMBERS VIEW
+           ============================================================ */
+        function MembersView({ members, onAdd, onUpdate, onDelete }) {
+            const toast = useToast();
+            const [search, setSearch] = useState('');
+            const [filterRole, setFilterRole] = useState('all');
+            const [showForm, setShowForm] = useState(false);
+            const [editItem, setEditItem] = useState(null);
+            const [confirmDelete, setConfirmDelete] = useState(null);
+            const [form, setForm] = useState({ name: '', role: '', position: '', bio: '', photo: '', social: { linkedin: '', twitter: '' }, joinDate: '', status: 'current' });
+            const [errors, setErrors] = useState({});
+
+            const roles = [...new Set(members.map(m => m.position))];
+
+            const openCreate = () => {
+                setEditItem(null);
+                setForm({ name: '', role: '', position: '', bio: '', photo: '', social: { linkedin: '', twitter: '' }, joinDate: '', status: 'current' });
+                setErrors({});
+                setShowForm(true);
+            };
+
+            const openEdit = (item) => {
+                setEditItem(item);
+                setForm({ ...item, social: { ...item.social } });
+                setErrors({});
+                setShowForm(true);
+            };
+
+            const validateForm = () => {
+                const errs = {};
+                const t = validateRequired(form.name, 'Name');
+                if (t) errs.name = t;
+                const r = validateRequired(form.role, 'Role/Position');
+                if (r) errs.role = r;
+                setErrors(errs);
+                return Object.keys(errs).length === 0;
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!validateForm()) return;
+                if (editItem) {
+                    onUpdate({ ...editItem, ...form });
+                    toast('Member updated!', 'success');
+                } else {
+                    onAdd({ ...form, id: Date.now() });
+                    toast('Member added!', 'success');
+                }
+                setShowForm(false);
+            };
+
+            let filtered = members.filter(m => {
+                if (search && !m.name.toLowerCase().includes(search.toLowerCase())) return false;
+                if (filterRole !== 'all' && m.position !== filterRole) return false;
+                return true;
+            });
+
+            const grouped = filtered.reduce((acc, m) => {
+                if (!acc[m.position]) acc[m.position] = [];
+                acc[m.position].push(m);
+                return acc;
+            }, {});
+
+            return (
+                <div>
+                    <div className="flex flex-center" style={{ justifyContent: 'space-between', marginBottom: 20 }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 700 }}>Team Directory</h3>
+                        <button className="btn btn-primary" onClick={openCreate}>
+                            <i className="fas fa-plus"></i> Add Member
+                        </button>
+                    </div>
+
+                    <div className="filter-bar">
+                        <div className="search-wrap">
+                            <i className="fas fa-search"></i>
+                            <input className="search-input" placeholder="Search members..." value={search} onChange={e => setSearch(e.target.value)} />
+                        </div>
+                        <select value={filterRole} onChange={e => setFilterRole(e.target.value)}>
+                            <option value="all">All Roles</option>
+                            {roles.map(r => <option key={r} value={r}>{r}</option>)}
+                        </select>
+                    </div>
+
+                    {Object.keys(grouped).length === 0 && (
+                        <div className="empty-state">
+                            <i className="fas fa-users"></i>
+                            <h4>No members found</h4>
+                        </div>
+                    )}
+
+                    {Object.entries(grouped).map(([position, items]) => (
+                        <div key={position} className="mb-4">
+                            <div className="section-title">
+                                <i className="fas fa-tag"></i> {position}
+                                <span className="badge" style={{ background: 'var(--gray-1)', color: 'var(--gray-4)', marginLeft: 8 }}>{items.length}</span>
+                            </div>
+                            <div className="member-grid">
+                                {items.map(m => (
+                                    <div key={m.id} className="member-card">
+                                        <div className="member-avatar">
+                                            {m.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                        </div>
+                                        <div className="member-info">
+                                            <div className="flex flex-center gap-2">
+                                                <h4>{m.name}</h4>
+                                                <span className={`badge badge-${m.status}`} style={{ fontSize: 10 }}>{m.status}</span>
+                                            </div>
+                                            <div className="role">{m.role}</div>
+                                            <p>{m.bio}</p>
+                                            {m.social && (m.social.linkedin || m.social.twitter) && (
+                                                <div className="social-links">
+                                                    {m.social.linkedin && <a href={m.social.linkedin}><i className="fab fa-linkedin"></i></a>}
+                                                    {m.social.twitter && <a href={m.social.twitter}><i className="fab fa-twitter"></i></a>}
+                                                </div>
+                                            )}
+                                            <div className="flex gap-2 mt-2">
+                                                <button className="btn btn-secondary btn-sm" onClick={() => openEdit(m)}><i className="fas fa-edit"></i> Edit</button>
+                                                <button className="btn btn-danger btn-sm" onClick={() => setConfirmDelete(m)}><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+
+                    <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editItem ? 'Edit Member' : 'Add New Member'}>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label>Full Name <span className="required">*</span></label>
+                                <input className={`form-control ${errors.name ? 'error' : ''}`} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="John Doe" />
+                                {errors.name && <div className="form-error">{errors.name}</div>}
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Role/Title <span className="required">*</span></label>
+                                    <input className={`form-control ${errors.role ? 'error' : ''}`} value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="CEO, Mentor, Intern..." />
+                                    {errors.role && <div className="form-error">{errors.role}</div>}
+                                </div>
+                                <div className="form-group">
+                                    <label>Position Category</label>
+                                    <input className="form-control" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })} placeholder="Executive, Mentor, Intern..." />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label>Bio</label>
+                                <textarea className="form-control" value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} placeholder="Short bio..." rows={2} />
+                            </div>
+                            <div className="form-group">
+                                <label>Photo URL</label>
+                                <input className="form-control" value={form.photo} onChange={e => setForm({ ...form, photo: e.target.value })} placeholder="https://example.com/photo.jpg" />
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>LinkedIn URL</label>
+                                    <input className="form-control" value={form.social.linkedin} onChange={e => setForm({ ...form, social: { ...form.social, linkedin: e.target.value } })} placeholder="https://linkedin.com/in/..." />
+                                </div>
+                                <div className="form-group">
+                                    <label>Twitter URL</label>
+                                    <input className="form-control" value={form.social.twitter} onChange={e => setForm({ ...form, social: { ...form.social, twitter: e.target.value } })} placeholder="https://twitter.com/..." />
+                                </div>
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Join Date</label>
+                                    <input type="date" className="form-control" value={form.joinDate} onChange={e => setForm({ ...form, joinDate: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Status</label>
+                                    <select className="form-control" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+                                        <option value="current">Current</option>
+                                        <option value="past">Past</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="form-actions">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                                <button type="submit" className="btn btn-primary">{editItem ? 'Update Member' : 'Add Member'}</button>
+                            </div>
+                        </form>
+                    </Modal>
+
+                    <ConfirmModal isOpen={!!confirmDelete} onClose={() => setConfirmDelete(null)}
+                        onConfirm={() => { onDelete(confirmDelete.id); toast('Member removed', 'success'); }}
+                        title="Remove Member" message={`Remove "${confirmDelete?.name}" from the directory?`} />
+                </div>
+            );
+        }
+
+        /* ============================================================
+           ============================================================
+           BLOG VIEW
+           ============================================================ */
+        function BlogView({ posts, categories, tags, onAdd, onUpdate, onDelete }) {
+            const toast = useToast();
+            const [search, setSearch] = useState('');
+            const [filterStatus, setFilterStatus] = useState('all');
+            const [filterCat, setFilterCat] = useState('all');
+            const [showForm, setShowForm] = useState(false);
+            const [editItem, setEditItem] = useState(null);
+            const [confirmDelete, setConfirmDelete] = useState(null);
+            const [form, setForm] = useState({ title: '', content: '', featuredImage: '', category: '', tags: [], author: '', publishDate: '', status: 'draft' });
+            const [errors, setErrors] = useState({});
+            const [tagInput, setTagInput] = useState('');
+
+            const openCreate = () => {
+                setEditItem(null);
+                setForm({ title: '', content: '', featuredImage: '', category: '', tags: [], author: '', publishDate: '', status: 'draft' });
+                setErrors({});
+                setShowForm(true);
+            };
+
+            const openEdit = (item) => {
+                setEditItem(item);
+                setForm({ ...item, tags: [...(item.tags || [])] });
+                setErrors({});
+                setShowForm(true);
+            };
+
+            const validateForm = () => {
+                const errs = {};
+                const t = validateRequired(form.title, 'Title');
+                if (t) errs.title = t;
+                const c = validateRequired(form.content, 'Content');
+                if (c) errs.content = c;
+                const a = validateRequired(form.author, 'Author');
+                if (a) errs.author = a;
+                setErrors(errs);
+                return Object.keys(errs).length === 0;
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!validateForm()) return;
+                if (editItem) {
+                    onUpdate({ ...editItem, ...form });
+                    toast('Post updated!', 'success');
+                } else {
+                    onAdd({ ...form, id: Date.now(), createdAt: new Date().toISOString() });
+                    toast('Post created!', 'success');
+                }
+                setShowForm(false);
+            };
+
+            const togglePublish = (post) => {
+                const newStatus = post.status === 'published' ? 'draft' : 'published';
+                const updated = { ...post, status: newStatus, publishDate: newStatus === 'published' ? new Date().toISOString().split('T')[0] : post.publishDate };
+                onUpdate(updated);
+                toast(`Post ${newStatus === 'published' ? 'published' : 'unpublished'}`, 'info');
+            };
+
+            const addTag = () => {
+                const t = tagInput.trim();
+                if (t && !form.tags.includes(t)) {
+                    setForm({ ...form, tags: [...form.tags, t] });
+                }
+                setTagInput('');
+            };
+
+            const removeTag = (tag) => {
+                setForm({ ...form, tags: form.tags.filter(t => t !== tag) });
+            };
+
+            let filtered = posts.filter(p => {
+                if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+                if (filterStatus !== 'all' && p.status !== filterStatus) return false;
+                if (filterCat !== 'all' && p.category !== filterCat) return false;
+                return true;
+            });
+
+            return (
+                <div>
+                    <div className="flex flex-center" style={{ justifyContent: 'space-between', marginBottom: 20 }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 700 }}>Blog Posts</h3>
+                        <button className="btn btn-primary" onClick={openCreate}>
+                            <i className="fas fa-plus"></i> New Post
+                        </button>
+                    </div>
+
+                    <div className="filter-bar">
+                        <div className="search-wrap">
+                            <i className="fas fa-search"></i>
+                            <input className="search-input" placeholder="Search posts..." value={search} onChange={e => setSearch(e.target.value)} />
+                        </div>
+                        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                            <option value="all">All Status</option>
+                            <option value="published">Published</option>
+                            <option value="draft">Draft</option>
+                        </select>
+                        <select value={filterCat} onChange={e => setFilterCat(e.target.value)}>
+                            <option value="all">All Categories</option>
+                            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="card">
+                        <div className="table-container">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Author</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.length === 0 && (
+                                        <tr><td colSpan="6" style={{ textAlign: 'center', padding: 40, color: 'var(--gray-4)' }}>No posts found</td></tr>
+                                    )}
+                                    {filtered.map(p => (
+                                        <tr key={p.id}>
+                                            <td><strong>{p.title}</strong></td>
+                                            <td>{p.category && <span className="chip">{p.category}</span>}</td>
+                                            <td>{p.author}</td>
+                                            <td>{p.publishDate || p.createdAt?.split('T')[0]}</td>
+                                            <td><span className={`badge badge-${p.status}`}>{p.status}</span></td>
+                                            <td>
+                                                <div className="actions">
+                                                    <button className="btn btn-secondary btn-sm" onClick={() => togglePublish(p)} title={p.status === 'published' ? 'Unpublish' : 'Publish'}>
+                                                        <i className={`fas ${p.status === 'published' ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                                                    </button>
+                                                    <button className="btn btn-secondary btn-sm" onClick={() => openEdit(p)}><i className="fas fa-edit"></i></button>
+                                                    <button className="btn btn-danger btn-sm" onClick={() => setConfirmDelete(p)}><i className="fas fa-trash"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Category & Tag Management */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginTop: 28 }}>
+                        <div className="card">
+                            <div className="card-header"><h3>Categories</h3></div>
+                            <div className="card-body">
+                                <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
+                                    {categories.map(c => <span key={c} className="chip">{c}</span>)}
+                                </div>
+                                <p className="text-muted mt-2" style={{ fontSize: 13 }}>Add new categories from the post editor</p>
+                            </div>
+                        </div>
+                        <div className="card">
+                            <div className="card-header"><h3>Available Tags</h3></div>
+                            <div className="card-body">
+                                <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
+                                    {tags.map(t => <span key={t} className="chip">{t}</span>)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Post Form Modal */}
+                    <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editItem ? 'Edit Post' : 'Create New Post'}>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label>Post Title <span className="required">*</span></label>
+                                <input className={`form-control ${errors.title ? 'error' : ''}`} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Enter post title" />
+                                {errors.title && <div className="form-error">{errors.title}</div>}
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Category</label>
+                                    <select className="form-control" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                                        <option value="">Select category</option>
+                                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Author <span className="required">*</span></label>
+                                    <input className={`form-control ${errors.author ? 'error' : ''}`} value={form.author} onChange={e => setForm({ ...form, author: e.target.value })} placeholder="Author name" />
+                                    {errors.author && <div className="form-error">{errors.author}</div>}
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label>Content <span className="required">*</span></label>
+                                <div className="rich-toolbar">
+                                    <button type="button"><i className="fas fa-bold"></i></button>
+                                    <button type="button"><i className="fas fa-italic"></i></button>
+                                    <button type="button"><i className="fas fa-list-ul"></i></button>
+                                    <button type="button"><i className="fas fa-list-ol"></i></button>
+                                    <button type="button"><i className="fas fa-link"></i></button>
+                                    <button type="button"><i className="fas fa-image"></i></button>
+                                </div>
+                                <textarea className={`form-control rich-editor ${errors.content ? 'error' : ''}`}
+                                    value={form.content} onChange={e => setForm({ ...form, content: e.target.value })}
+                                    placeholder="Write your post content here..." />
+                                {errors.content && <div className="form-error">{errors.content}</div>}
+                            </div>
+                            <div className="form-group">
+                                <label>Featured Image URL</label>
+                                <input className="form-control" value={form.featuredImage} onChange={e => setForm({ ...form, featuredImage: e.target.value })} placeholder="https://example.com/featured.jpg" />
+                            </div>
+                            <div className="form-group">
+                                <label>Tags</label>
+                                <div className="flex gap-2" style={{ flexWrap: 'wrap', marginBottom: 8 }}>
+                                    {form.tags.map(t => (
+                                        <span key={t} className="chip">
+                                            {t}
+                                            <span className="chip-remove" onClick={() => removeTag(t)}>&times;</span>
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="flex gap-2">
+                                    <input className="form-control" placeholder="Add a tag..." value={tagInput}
+                                        onChange={e => setTagInput(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }} />
+                                    <button type="button" className="btn btn-secondary btn-sm" onClick={addTag}>Add</button>
+                                </div>
+                            </div>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Publish Date</label>
+                                    <input type="date" className="form-control" value={form.publishDate} onChange={e => setForm({ ...form, publishDate: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Status</label>
+                                    <select className="form-control" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+                                        <option value="draft">Draft</option>
+                                        <option value="published">Published</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="form-actions">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                                <button type="submit" className="btn btn-primary">{editItem ? 'Update Post' : 'Create Post'}</button>
+                            </div>
+                        </form>
+                    </Modal>
+
+                    <ConfirmModal isOpen={!!confirmDelete} onClose={() => setConfirmDelete(null)}
+                        onConfirm={() => { onDelete(confirmDelete.id); toast('Post deleted', 'success'); }}
+                        title="Delete Post" message={`Delete "${confirmDelete?.title}"?`} />
+                </div>
+            );
+        }
+
+        /* ============================================================
+           ============================================================
+           APPLICATIONS VIEW
+           ============================================================ */
+        function ApplicationsView({ applications, onUpdateStatus }) {
+            const toast = useToast();
+            const [search, setSearch] = useState('');
+            const [filterStatus, setFilterStatus] = useState('all');
+            const [filterPosition, setFilterPosition] = useState('all');
+
+            const positions = [...new Set(applications.map(a => a.position))];
+
+            let filtered = applications.filter(a => {
+                if (search && !a.name.toLowerCase().includes(search.toLowerCase()) && !a.email.toLowerCase().includes(search.toLowerCase())) return false;
+                if (filterStatus !== 'all' && a.status !== filterStatus) return false;
+                if (filterPosition !== 'all' && a.position !== filterPosition) return false;
+                return true;
+            });
+
+            const handleStatusChange = (app, newStatus) => {
+                onUpdateStatus(app.id, newStatus);
+                toast(`Application ${newStatus}`, 'success');
+            };
+
+            const exportCSV = () => {
+                const headers = ['Name', 'Email', 'Position', 'Submitted Date', 'Status'];
+                const rows = filtered.map(a => [a.name, a.email, a.position, a.submittedDate, a.status]);
+                const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `applications-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast('CSV exported!', 'success');
+            };
+
+            return (
+                <div>
+                    <div className="flex flex-center" style={{ justifyContent: 'space-between', marginBottom: 20 }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 700 }}>Applications</h3>
+                        <button className="btn btn-secondary" onClick={exportCSV}>
+                            <i className="fas fa-download"></i> Export CSV
+                        </button>
+                    </div>
+
+                    <div className="filter-bar">
+                        <div className="search-wrap">
+                            <i className="fas fa-search"></i>
+                            <input className="search-input" placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)} />
+                        </div>
+                        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="reviewed">Reviewed</option>
+                            <option value="accepted">Accepted</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <select value={filterPosition} onChange={e => setFilterPosition(e.target.value)}>
+                            <option value="all">All Positions</option>
+                            {positions.map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="card">
+                        <div className="table-container">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Position</th>
+                                        <th>Submitted</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.length === 0 && (
+                                        <tr><td colSpan="6" style={{ textAlign: 'center', padding: 40, color: 'var(--gray-4)' }}>No applications found</td></tr>
+                                    )}
+                                    {filtered.map(a => (
+                                        <tr key={a.id} style={a.status === 'pending' ? { background: 'var(--orange-light)' } : {}}>
+                                            <td><strong>{a.name}</strong></td>
+                                            <td>{a.email}</td>
+                                            <td>{a.position}</td>
+                                            <td>{new Date(a.submittedDate).toLocaleDateString()}</td>
+                                            <td>
+                                                <select className="form-control" style={{ width: 'auto', padding: '4px 28px 4px 8px', fontSize: 12 }}
+                                                    value={a.status} onChange={e => handleStatusChange(a, e.target.value)}>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="reviewed">Reviewed</option>
+                                                    <option value="accepted">Accepted</option>
+                                                    <option value="rejected">Rejected</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <div className="actions">
+                                                    <button className="btn btn-success btn-sm" onClick={() => handleStatusChange(a, 'accepted')}>
+                                                        <i className="fas fa-check"></i>
+                                                    </button>
+                                                    <button className="btn btn-danger btn-sm" onClick={() => handleStatusChange(a, 'rejected')}>
+                                                        <i className="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div className="stats-grid" style={{ marginTop: 24 }}>
+                        <div className="stat-card">
+                            <div className="stat-value" style={{ fontSize: 22 }}>{applications.filter(a => a.status === 'pending').length}</div>
+                            <div className="stat-label">Pending Review</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value" style={{ fontSize: 22 }}>{applications.filter(a => a.status === 'reviewed').length}</div>
+                            <div className="stat-label">Reviewed</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value" style={{ fontSize: 22, background: 'none', WebkitTextFillColor: 'unset', color: 'var(--success-text)' }}>{applications.filter(a => a.status === 'accepted').length}</div>
+                            <div className="stat-label">Accepted</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value" style={{ fontSize: 22, background: 'none', WebkitTextFillColor: 'unset', color: 'var(--orange-dark)' }}>{applications.filter(a => a.status === 'rejected').length}</div>
+                            <div className="stat-label">Rejected</div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        /* ============================================================
+           ============================================================
+           APP — Root Component
+           ============================================================ */
+        function App() {
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+
+            // Mock database — simulates a real backend
+            const [events, setEvents] = useState(MOCK_DATA.events);
+            const [gallery, setGallery] = useState(MOCK_DATA.gallery);
+            const [members, setMembers] = useState(MOCK_DATA.members);
+            const [posts, setPosts] = useState(MOCK_DATA.posts);
+            const [applications, setApplications] = useState(MOCK_DATA.applications);
+            const [categories, setCategories] = useState(MOCK_DATA.categories);
+            const [tags, setTags] = useState(MOCK_DATA.tags);
+
+            const tabTitles = {
+                dashboard: 'Dashboard',
+                events: 'Event Management',
+                gallery: 'Gallery Management',
+                members: 'Members & Interns',
+                blog: 'Blog Management',
+                applications: 'Applications Management',
+            };
+
+            const pendingCount = applications.filter(a => a.status === 'pending').length;
+
+            const data = { events, gallery, members, posts, applications };
+
+            const renderView = () => {
+                switch (activeTab) {
+                    case 'dashboard':
+                        return <DashboardView data={data} />;
+                    case 'events':
+                        return <EventsView events={events}
+                            onAdd={(e) => setEvents(prev => [e, ...prev])}
+                            onUpdate={(e) => setEvents(prev => prev.map(i => i.id === e.id ? e : i))}
+                            onDelete={(id) => setEvents(prev => prev.filter(i => i.id !== id))} />;
+                    case 'gallery':
+                        return <GalleryView gallery={gallery}
+                            onAdd={(img) => setGallery(prev => [img, ...prev])}
+                            onDelete={(id) => setGallery(prev => prev.filter(i => i.id !== id))}
+                            onReorder={(items) => setGallery(items)} />;
+                    case 'members':
+                        return <MembersView members={members}
+                            onAdd={(m) => setMembers(prev => [m, ...prev])}
+                            onUpdate={(m) => setMembers(prev => prev.map(i => i.id === m.id ? m : i))}
+                            onDelete={(id) => setMembers(prev => prev.filter(i => i.id !== id))} />;
+                    case 'blog':
+                        return <BlogView posts={posts} categories={categories} tags={tags}
+                            onAdd={(p) => setPosts(prev => [p, ...prev])}
+                            onUpdate={(p) => setPosts(prev => prev.map(i => i.id === p.id ? p : i))}
+                            onDelete={(id) => setPosts(prev => prev.filter(i => i.id !== id))} />;
+                    case 'applications':
+                        return <ApplicationsView applications={applications}
+                            onUpdateStatus={(id, status) => setApplications(prev => prev.map(a => a.id === id ? { ...a, status } : a))} />;
+                    default:
+                        return <DashboardView data={data} />;
+                }
+            };
+
+            return (
+                <div className="app-layout">
+                    <Sidebar activeTab={activeTab} onNavigate={setActiveTab}
+                        isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)}
+                        pendingCount={pendingCount} />
+                    <div className="main-area">
+                        <Header title={tabTitles[activeTab]} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+                        <main className="main-content">
+                            {renderView()}
+                        </main>
+                    </div>
+                </div>
+            );
+        }
+
+        /* ============================================================
+           Mount the App
+           ============================================================ */
+        const root = createRoot(document.getElementById('root'));
+        root.render(
+            <ToastProvider>
+                <App />
+            </ToastProvider>
+        );
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,257 @@
+.navbar {
+  position: fixed;
+  top: 20px;
+  left: 0;
+  width: 100%;
+  height: 72px;
+  z-index: 1000;
+  transition: background-color var(--transition-base), backdrop-filter var(--transition-base), border-color var(--transition-base);
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  box-sizing: border-box;
+}
+
+.scrolled {
+  top: 20px;
+  left: 5%;
+  width: 90%;
+  height: 64px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.logoIcon {
+  color: var(--apex-primary);
+  display: flex;
+  align-items: center;
+}
+
+.logoText {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: var(--apex-text-white);
+}
+
+.logoText span {
+  color: var(--apex-primary);
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.navItem {
+  color: var(--apex-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  position: relative;
+  padding: 10px 0;
+  transition: color var(--transition-fast);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navItem:hover {
+  color: var(--apex-text-white);
+}
+
+.activeNavItem {
+  color: var(--apex-text-white);
+}
+
+.activeNavItem::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+}
+
+/* Dropdown Container */
+.dropdownContainer {
+  position: relative;
+}
+
+/* Trigger hover actions for desktop */
+@media (min-width: 1025px) {
+  .dropdownContainer:hover .dropdownMenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background-color: var(--apex-bg-surface);
+  border: 1px solid var(--apex-border-dark);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-2) 0;
+  min-width: 180px;
+  z-index: 1050;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
+}
+
+.dropdownItem {
+  display: block;
+  padding: 8px 16px;
+  color: var(--apex-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  text-align: left;
+}
+
+.dropdownItem:hover {
+  background-color: var(--apex-bg-surface-elevated);
+  color: var(--apex-primary);
+}
+
+.activeDropdownItem {
+  color: var(--apex-primary);
+  font-weight: 600;
+}
+
+.ctas {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.menuButton {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--apex-text-white);
+  cursor: pointer;
+  z-index: 1010;
+}
+
+/* Mobile Nav Overlay */
+.mobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--apex-bg-base);
+  z-index: 1005;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-5);
+  transform: translateY(-100%);
+  transition: transform var(--transition-slow);
+}
+
+.mobileOverlayActive {
+  transform: translateY(0);
+}
+
+.mobileNavLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.mobileNavItem {
+  font-size: 1.25rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  color: var(--apex-text-muted);
+  transition: color var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobileSubLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  background: var(--apex-bg-surface-elevated);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  width: 200px;
+}
+
+.mobileSubLink {
+  font-size: 0.95rem;
+  color: var(--apex-text-muted);
+  font-weight: 600;
+}
+
+.mobileNavItem:hover,
+.mobileActiveNavItem {
+  color: var(--apex-text-white);
+}
+
+.mobileCtas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 80%;
+  max-width: 300px;
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 1024px) {
+
+  .navLinks,
+  .ctas {
+    display: none;
+  }
+
+  .menuButton {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+}

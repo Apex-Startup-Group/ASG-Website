@@ -1,0 +1,1 @@
+ALTER TABLE "intern_applications" ADD COLUMN "is_existing_intern" boolean DEFAULT false NOT NULL;

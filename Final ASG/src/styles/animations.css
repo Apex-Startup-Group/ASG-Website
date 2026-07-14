@@ -1,0 +1,159 @@
+/* Keyframes & Utility animations */
+
+@keyframes floatOrbs {
+  0% {
+    transform: translateY(0px) translateX(0px) scale(1);
+  }
+  33% {
+    transform: translateY(-30px) translateX(15px) scale(1.05);
+  }
+  66% {
+    transform: translateY(15px) translateX(-20px) scale(0.95);
+  }
+  100% {
+    transform: translateY(0px) translateX(0px) scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes rotateOrbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-float {
+  animation: floatOrbs 12s infinite ease-in-out;
+}
+
+.animate-float-delayed {
+  animation: floatOrbs 16s infinite ease-in-out;
+  animation-delay: 2s;
+}
+
+.animate-glow {
+  animation: pulseGlow 6s infinite ease-in-out;
+}
+
+.animate-rotate {
+  animation: rotateOrbit 40s infinite linear;
+}
+
+/* Scroll enter transitions */
+.fade-up-enter {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s var(--transition-slow), transform 0.6s var(--transition-slow);
+}
+
+.fade-up-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fade-up-enter {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Continuous scrolling marquee */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-container {
+  overflow: hidden;
+  width: 100%;
+  padding: 24px 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* Fade mask edges */
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 80px; /* spacing between logos */
+  animation: marquee 25s linear infinite;
+  width: max-content;
+  align-items: center;
+}
+
+/* Partner logos — transparent PNGs, clean, no background */
+.partner-logo-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.partner-logo-item img {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  filter: grayscale(100%) brightness(0.5);
+  opacity: 0.6;
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+
+/* Hover: reveal original color + glow */
+.partner-logo-item.simplesphere img:hover {
+  filter: grayscale(0%) brightness(1) drop-shadow(0 0 14px rgba(0, 145, 255, 0.7));
+  opacity: 1;
+}
+
+.partner-logo-item.logicpoint img:hover {
+  filter: grayscale(0%) brightness(1) drop-shadow(0 0 14px rgba(229, 57, 85, 0.7));
+  opacity: 1;
+}
+
+.partner-logo-item.ut img:hover {
+  filter: grayscale(0%) brightness(1) drop-shadow(0 0 14px rgba(85, 196, 239, 0.7));
+  opacity: 1;
+}
+
+.partner-logo-item.aspireya img:hover {
+  filter: grayscale(0%) brightness(1) drop-shadow(0 0 14px rgba(255, 126, 0, 0.7));
+  opacity: 1;
+}
+
+/* Bigger logo for square-format ones */
+.partner-logo-item.logicpoint img,
+.partner-logo-item.ut img {
+  height: 64px;
+}
+
+
+
+
+

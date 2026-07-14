@@ -1,0 +1,1 @@
+ALTER TABLE "problem_statements" DROP COLUMN "domain";

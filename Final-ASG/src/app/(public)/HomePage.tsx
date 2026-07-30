@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useInView } from 'react-intersection-observer';
-import { ArrowRight, Calendar, MapPin, CheckCircle } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, CheckCircle, Star } from 'lucide-react';
 import PageWrapper from '@/components/layout/PageWrapper/PageWrapper';
 import SectionHeading from '@/components/common/SectionHeading/SectionHeading';
 import Lightbox from '@/components/common/Lightbox/Lightbox';
@@ -47,13 +47,24 @@ interface BlogEntry {
   excerpt: string;
 }
 
+export interface TestimonialEntry {
+  id: string;
+  name: string;
+  role: string;
+  company?: string;
+  avatar?: string;
+  content: string;
+  rating?: number;
+}
+
 interface HomePageProps {
   events: EventEntry[];
   galleryEntries: GalleryEntry[];
   blogs: BlogEntry[];
+  testimonials?: TestimonialEntry[];
 }
 
-export default function HomePage({ events, galleryEntries, blogs }: HomePageProps) {
+export default function HomePage({ events, galleryEntries, blogs, testimonials = [] }: HomePageProps) {
   const router = useRouter();
 
   const words = ['Community', 'Innovation', 'Growth'];
@@ -635,77 +646,64 @@ export default function HomePage({ events, galleryEntries, blogs }: HomePageProp
       <section ref={testimonialsAnim.ref} className={`section ${testimonialsAnim.className}`} style={{ backgroundColor: 'var(--apex-bg-surface-elevated)' }}>
         <div className="container">
           <SectionHeading overline="What ASG Members Say" title="Community Voices" subtitle="Read real feedback from students, founders, and investors building in North Maharashtra." />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-4)' }} className="grid-3">
-            <div style={{
-              backgroundColor: 'var(--apex-bg-surface)',
-              padding: 'var(--space-4)',
-              borderRadius: 'var(--radius-md)',
-              borderLeft: '4px solid var(--apex-primary)',
-              borderTop: '1px solid var(--apex-border-dark)',
-              borderRight: '1px solid var(--apex-border-dark)',
-              borderBottom: '1px solid var(--apex-border-dark)',
-              boxShadow: 'var(--shadow-sm)',
-            }}>
-              <p style={{ fontStyle: 'italic', marginBottom: 'var(--space-4)', color: 'var(--apex-text-muted)' }}>
-                "The AAL internship was the first time I built something that went live. Connecting with real startup mentors helped me understand the software lifecycle beyond textbook theories."
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gradient-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                  RK
+          {testimonials && testimonials.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-4)' }} className="grid-3">
+              {testimonials.map((t) => (
+                <div
+                  key={t.id}
+                  style={{
+                    backgroundColor: 'var(--apex-bg-surface)',
+                    padding: 'var(--space-4)',
+                    borderRadius: 'var(--radius-md)',
+                    borderLeft: '4px solid var(--apex-primary)',
+                    borderTop: '1px solid var(--apex-border-dark)',
+                    borderRight: '1px solid var(--apex-border-dark)',
+                    borderBottom: '1px solid var(--apex-border-dark)',
+                    boxShadow: 'var(--shadow-sm)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div>
+                    {(t.rating ?? 5) > 0 && (
+                      <div style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}>
+                        {[...Array(t.rating ?? 5)].map((_, i) => (
+                          <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
+                        ))}
+                      </div>
+                    )}
+                    <p style={{ fontStyle: 'italic', marginBottom: 'var(--space-4)', color: 'var(--apex-text-muted)', lineHeight: 1.6 }}>
+                      "{t.content}"
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: 'var(--space-2)' }}>
+                    {t.avatar ? (
+                      <img
+                        src={t.avatar}
+                        alt={t.name}
+                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gradient-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                        {t.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <h5 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--apex-text-white)' }}>{t.name}</h5>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--apex-text-muted)' }}>
+                        {t.role}{t.company ? ` • ${t.company}` : ''}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h5 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--apex-text-white)' }}>Rohit Kharat</h5>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--apex-text-muted)' }}>AAL Cohort 2 Alumnus</p>
-                </div>
-              </div>
+              ))}
             </div>
-            <div style={{
-              backgroundColor: 'var(--apex-bg-surface)',
-              padding: 'var(--space-4)',
-              borderRadius: 'var(--radius-md)',
-              borderLeft: '4px solid var(--apex-primary)',
-              borderTop: '1px solid var(--apex-border-dark)',
-              borderRight: '1px solid var(--apex-border-dark)',
-              borderBottom: '1px solid var(--apex-border-dark)',
-              boxShadow: 'var(--shadow-sm)',
-            }}>
-              <p style={{ fontStyle: 'italic', marginBottom: 'var(--space-4)', color: 'var(--apex-text-muted)' }}>
-                "Building a business in a Tier-2 city can feel isolating. APEX Startup Group provided a curated space to brainstorm hiring plans, meet advisors, and share localized operational problems."
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gradient-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                  VM
-                </div>
-                <div>
-                  <h5 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--apex-text-white)' }}>Vikram Mahajan</h5>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--apex-text-muted)' }}>Founder, AgriConnect Jalgaon</p>
-                </div>
-              </div>
-            </div>
-            <div style={{
-              backgroundColor: 'var(--apex-bg-surface)',
-              padding: 'var(--space-4)',
-              borderRadius: 'var(--radius-md)',
-              borderLeft: '4px solid var(--apex-primary)',
-              borderTop: '1px solid var(--apex-border-dark)',
-              borderRight: '1px solid var(--apex-border-dark)',
-              borderBottom: '1px solid var(--apex-border-dark)',
-              boxShadow: 'var(--shadow-sm)',
-            }}>
-              <p style={{ fontStyle: 'italic', marginBottom: 'var(--space-4)', color: 'var(--apex-text-muted)' }}>
-                "I was impressed by the quality of interns coming out of the AAL program. Their grasp of practical tools like Git, Figma, and basic API integrations is exceptionally strong for engineering undergraduates."
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gradient-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                  AP
-                </div>
-                <div>
-                  <h5 style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--apex-text-white)' }}>Abhay Patil</h5>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--apex-text-muted)' }}>Technical Director, TechNol Inc</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          ) : (
+            <p className="body-sm" style={{ color: 'var(--apex-text-muted)', textAlign: 'center', margin: '24px 0' }}>
+              Approved community testimonials will appear here.
+            </p>
+          )}
         </div>
       </section>
 

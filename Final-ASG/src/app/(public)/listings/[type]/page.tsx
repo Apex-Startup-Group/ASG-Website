@@ -6,8 +6,6 @@ import Link from 'next/link';
 import { ArrowLeft, Filter } from 'lucide-react';
 import PageWrapper from '@/components/layout/PageWrapper/PageWrapper';
 import SectionHeading from '@/components/common/SectionHeading/SectionHeading';
-import { asgMembers, aalInterns } from '@/data/listingsData';
-import { domains } from '@/data/domains';
 import ApexDropdown from '@/components/common/ApexDropdown/ApexDropdown';
 
 function ListingsContent() {
@@ -102,12 +100,39 @@ function ListingsContent() {
     router.push(`/listings/${type}?${newParams.toString()}`);
   };
 
+  // Derive dynamic domains list from live intern records
+  const dynamicDomainsMap = new Map<string, string>();
+  dbInterns.forEach((intern) => {
+    const rawDomain = intern.domain || 'General';
+    const slug = rawDomain.toLowerCase().replace(/\s+/g, '-');
+    if (!dynamicDomainsMap.has(slug)) {
+      dynamicDomainsMap.set(slug, rawDomain);
+    }
+  });
+
+  const availableDomains = Array.from(dynamicDomainsMap.entries()).map(([id, name]) => ({ id, name }));
+
   // Get data to display
   let displayData: any[] = [];
   if (currentType === 'interns') {
-    if (isLoaded && dbInterns.length > 0) {
-      if (selectedProject === 'all') {
-        displayData = dbInterns.map(intern => ({
+    if (selectedProject === 'all') {
+      displayData = dbInterns.map(intern => ({
+        id: intern.id,
+        name: intern.name,
+        course: intern.course || 'B.Tech/Other',
+        year: intern.year || 'Graduated/Active',
+        college: intern.college || 'SSBT COET',
+        photo: intern.photo || '',
+        project: intern.domain || 'General',
+        projectId: (intern.domain || 'general').toLowerCase().replace(/\s+/g, '-')
+      }));
+    } else {
+      displayData = dbInterns
+        .filter(intern => {
+          const projId = (intern.domain || 'general').toLowerCase().replace(/\s+/g, '-');
+          return projId === selectedProject;
+        })
+        .map(intern => ({
           id: intern.id,
           name: intern.name,
           course: intern.course || 'B.Tech/Other',
@@ -115,71 +140,35 @@ function ListingsContent() {
           college: intern.college || 'SSBT COET',
           photo: intern.photo || '',
           project: intern.domain || 'General',
-          projectId: (intern.domain || 'general').toLowerCase().replace(/\s+/g, '-')
+          projectId: selectedProject
         }));
-      } else {
-        displayData = dbInterns
-          .filter(intern => {
-            const projId = (intern.domain || 'general').toLowerCase().replace(/\s+/g, '-');
-            return projId === selectedProject;
-          })
-          .map(intern => ({
-            id: intern.id,
-            name: intern.name,
-            course: intern.course || 'B.Tech/Other',
-            year: intern.year || 'Graduated/Active',
-            college: intern.college || 'SSBT COET',
-            photo: intern.photo || '',
-            project: intern.domain || 'General',
-            projectId: selectedProject
-          }));
-      }
-    } else {
-      // Fallback to static data
-      if (selectedProject === 'all') {
-        Object.keys(aalInterns).forEach(projId => {
-          const projName = domains.find(d => d.id === projId)?.name || projId;
-          const list = (aalInterns as any)[projId] || [];
-          list.forEach((intern: any) => {
-            displayData.push({ ...intern, project: projName, projectId: projId });
-          });
-        });
-      } else {
-        const projName = domains.find(d => d.id === selectedProject)?.name || selectedProject;
-        const internsForProj = (aalInterns as any)[selectedProject] || [];
-        displayData = internsForProj.map((intern: any) => ({ ...intern, project: projName, projectId: selectedProject }));
-      }
     }
   } else {
-    if (isLoaded && dbMembers.length > 0) {
-      const typeMapping: Record<string, string> = {
-        'founders': 'founder',
-        'mentors': 'mentor',
-        'investors': 'investor',
-        'service-providers': 'service_provider',
-        'other': 'other'
-      };
-      const dbType = typeMapping[currentType];
-      displayData = dbMembers
-        .filter(m => m.memberType === dbType && m.showOnWebsite)
-        .map(m => ({
-          id: m.id,
-          name: m.name,
-          company: m.company || '',
-          role: m.designation || m.memberType || '',
-          photo: m.photo || '',
-          phone: m.phone || '',
-          companyWebsite: m.websiteUrl || '',
-          socialLinks: m.linkedinUrl ? [m.linkedinUrl] : [],
-          description: m.bio || ''
-        }));
-    } else {
-      displayData = (asgMembers as any)[currentType] || [];
-    }
+    const typeMapping: Record<string, string> = {
+      'founders': 'founder',
+      'mentors': 'mentor',
+      'investors': 'investor',
+      'service-providers': 'service_provider',
+      'other': 'other'
+    };
+    const dbType = typeMapping[currentType];
+    displayData = dbMembers
+      .filter(m => m.memberType === dbType && m.showOnWebsite)
+      .map(m => ({
+        id: m.id,
+        name: m.name,
+        company: m.company || '',
+        role: m.designation || m.memberType || '',
+        photo: m.photo || '',
+        phone: m.phone || '',
+        companyWebsite: m.websiteUrl || '',
+        socialLinks: m.linkedinUrl ? [m.linkedinUrl] : [],
+        description: m.bio || ''
+      }));
   }
 
   // Resolve currently selected project name
-  const currentProjectName = selectedProject === 'all' ? 'All Projects' : (domains.find(d => d.id === selectedProject)?.name || selectedProject);
+  const currentProjectName = selectedProject === 'all' ? 'All Projects' : (dynamicDomainsMap.get(selectedProject) || selectedProject);
 
   return (
     <div className="container">
@@ -241,7 +230,7 @@ function ListingsContent() {
             label={currentProjectName}
             options={[
               { value: 'all', label: 'All Projects' },
-              ...domains.map((d) => ({ value: d.id, label: d.name }))
+              ...availableDomains.map((d) => ({ value: d.id, label: d.name }))
             ]}
             onSelect={handleProjectFilterChange}
             minWidth="200px"

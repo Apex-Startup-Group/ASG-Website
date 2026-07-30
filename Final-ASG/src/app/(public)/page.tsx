@@ -1,6 +1,7 @@
 import HomePage from './HomePage';
 import { db } from '@/lib/db';
 import { events, galleryAlbums, galleryPhotos, blogs } from '@/lib/db/schema';
+import { getTestimonialsAction } from '@/app/actions/testimonials';
 import { desc, asc, eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +10,7 @@ export default async function Page() {
   let fetchedEvents = [];
   let galleryEntries = [];
   let fetchedBlogs = [];
+  let fetchedTestimonials = [];
 
   try {
     // 1. Fetch Events
@@ -86,9 +88,19 @@ export default async function Page() {
       readTime: Math.ceil((post.body?.split(' ').length || 0) / 200) + ' min read',
     }));
 
+    // 4. Fetch Active Testimonials
+    fetchedTestimonials = await getTestimonialsAction({ publicOnly: true });
+
   } catch (error) {
     console.error('Error loading homepage data from Database via Drizzle:', error);
   }
 
-  return <HomePage events={fetchedEvents} galleryEntries={galleryEntries} blogs={fetchedBlogs} />;
+  return (
+    <HomePage
+      events={fetchedEvents}
+      galleryEntries={galleryEntries}
+      blogs={fetchedBlogs}
+      testimonials={fetchedTestimonials}
+    />
+  );
 }

@@ -13,3 +13,4 @@ export * from './contact_queries';
 export * from './intern_applications';
 export * from './community_member_applications';
 export * from './site_settings';
+export * from './testimonials';

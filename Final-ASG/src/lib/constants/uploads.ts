@@ -63,4 +63,11 @@ export const UPLOAD_CONFIGS: Record<string, UploadConfig> = {
     maxWidth: 200,
     bucket: "avatars",
   },
+  testimonial_avatar: {
+    label: "Testimonial Avatar",
+    maxSize: 500 * 1024, // 500KB
+    aspectRatio: 1 / 1,
+    maxWidth: 400,
+    bucket: "avatars",
+  },
 };

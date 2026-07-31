@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { galleryAlbums, galleryPhotos } from '@/lib/db/schema';
 import { desc, asc, eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { deleteStorageFile } from '@/lib/supabase/service';
 
 export async function GET(req: Request) {
   try {
@@ -149,7 +150,28 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Missing ID parameter' }, { status: 400 });
     }
 
-    // cascade deletes photos automatically
+    // 1. Retrieve all photo URLs associated with this album
+    const photosToDelete = await db
+      .select({ imageUrl: galleryPhotos.imageUrl })
+      .from(galleryPhotos)
+      .where(eq(galleryPhotos.albumId, id));
+
+    const albumRecord = await db
+      .select({ coverPhoto: galleryAlbums.coverPhoto })
+      .from(galleryAlbums)
+      .where(eq(galleryAlbums.id, id));
+
+    // 2. Delete each image file from 'media' storage bucket
+    for (const p of photosToDelete) {
+      if (p.imageUrl) {
+        await deleteStorageFile(p.imageUrl, 'media');
+      }
+    }
+    if (albumRecord.length > 0 && albumRecord[0].coverPhoto) {
+      await deleteStorageFile(albumRecord[0].coverPhoto, 'media');
+    }
+
+    // 3. Delete database record (cascade deletes galleryPhotos)
     await db.delete(galleryAlbums).where(eq(galleryAlbums.id, id));
 
     return NextResponse.json({ success: true, message: 'Gallery album deleted successfully' });

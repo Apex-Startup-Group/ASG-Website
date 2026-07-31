@@ -5,14 +5,16 @@ import { Plus, Trash2, Pencil, Images, Search, Filter, UploadCloud, X, Undo, Red
 import Modal, { FormField, Input, Select, Textarea, PrimaryBtn, DangerBtn, GhostBtn } from "@/components/admin/Modal";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { useUndoRedoState } from "@/hooks/admin/useUndoRedoState";
+import CropModal from "@/components/shared/CropModal";
+import { getCroppedImg, Area } from "@/lib/utils/image";
 
 interface GalleryItem {
   id: string | number;
   title: string;
-  year: string;
-  date: string;
   description: string;
-  photos: string[]; // array of strings (base64 or URL)
+  date: string;
+  year: string;
+  photos: string[];
   photographer?: string;
 }
 
@@ -22,9 +24,9 @@ const YEARS = ["All", "2026", "2025", "2024", "2023", "2022", "2021", "2020", "2
 
 const empty: Omit<GalleryItem, "id"> = {
   title: "",
-  year: "2026",
-  date: "",
   description: "",
+  date: "",
+  year: new Date().getFullYear().toString(),
   photos: [],
   photographer: "APEX Media Team"
 };
@@ -32,12 +34,20 @@ const empty: Omit<GalleryItem, "id"> = {
 export default function GalleryPage() {
   const [items, setItems, undo, redo, canUndo, canRedo] = useUndoRedoState<GalleryItem[]>(INITIAL);
   const [search, setSearch] = useState("");
-  const [filterYear, setFilterYear] = useState("All");
+  const [filterYear, setFilterYear] = useState<string>("All");
   const [modal, setModal] = useState<{ open: boolean; mode: "add" | "edit" | "delete"; item: GalleryItem | null }>({
     open: false, mode: "add", item: null,
   });
   const [form, setForm] = useState<Omit<GalleryItem, "id">>(empty);
   const [dragActive, setDragActive] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Staged Image Cropping State
+  const [pendingCropQueue, setPendingCropQueue] = useState<string[]>([]);
+  const [currentRawSrc, setCurrentRawSrc] = useState<string | null>(null);
+  const [isCropOpen, setIsCropOpen] = useState(false);
+  const [pendingBlobs, setPendingBlobs] = useState<Blob[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function loadGallery() {
@@ -76,19 +86,65 @@ export default function GalleryPage() {
   };
 
   const handleFiles = (files: File[]) => {
+    setErrorMsg(null);
+    let hasOverSize = false;
+    const validFiles: File[] = [];
+
     files.forEach(file => {
       if (!file.type.startsWith("image/")) return;
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setForm((f) => ({
-            ...f,
-            photos: [...f.photos, event.target!.result as string]
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 5 * 1024 * 1024) {
+        hasOverSize = true;
+        return;
+      }
+      validFiles.push(file);
     });
+
+    if (hasOverSize) {
+      setErrorMsg("One or more images exceed the 5MB size limit and were skipped.");
+    }
+
+    if (validFiles.length === 0) return;
+
+    // Read all selected files into raw data URLs queue for cropping sequentially
+    const readPromises = validFiles.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readPromises).then(dataUrls => {
+      if (dataUrls.length > 0) {
+        setPendingCropQueue(dataUrls);
+        setCurrentRawSrc(dataUrls[0]);
+        setIsCropOpen(true);
+      }
+    });
+  };
+
+  const handleCropConfirm = async (pixelCrop: Area) => {
+    if (!currentRawSrc) return;
+    try {
+      const croppedBlob = await getCroppedImg(currentRawSrc, pixelCrop, 1024);
+      if (croppedBlob) {
+        setPendingBlobs(prev => [...prev, croppedBlob]);
+        const previewUrl = URL.createObjectURL(croppedBlob);
+        setForm(f => ({ ...f, photos: [...f.photos, previewUrl] }));
+      }
+    } catch (err: any) {
+      setErrorMsg("Failed to crop image.");
+    }
+
+    // Process next image in queue if any
+    const remaining = pendingCropQueue.slice(1);
+    setPendingCropQueue(remaining);
+    if (remaining.length > 0) {
+      setCurrentRawSrc(remaining[0]);
+    } else {
+      setIsCropOpen(false);
+      setCurrentRawSrc(null);
+    }
   };
 
   const removePhotoAtIndex = (index: number) => {
@@ -96,6 +152,7 @@ export default function GalleryPage() {
       ...f,
       photos: f.photos.filter((_, i) => i !== index)
     }));
+    setPendingBlobs((blobs) => blobs.filter((_, i) => i !== index));
   };
 
   const filtered = items.filter((i) => {
@@ -105,23 +162,81 @@ export default function GalleryPage() {
   });
 
   const openAdd = () => {
+    setErrorMsg(null);
+    setPendingBlobs([]);
+    setPendingCropQueue([]);
+    setCurrentRawSrc(null);
     setForm(empty);
     setModal({ open: true, mode: "add", item: null });
   };
   const openEdit = (item: GalleryItem) => {
+    setErrorMsg(null);
+    setPendingBlobs([]);
+    setPendingCropQueue([]);
+    setCurrentRawSrc(null);
     const { id, ...rest } = item;
     setForm(rest);
     setModal({ open: true, mode: "edit", item });
   };
-  const openDelete = (item: GalleryItem) => setModal({ open: true, mode: "delete", item });
-  const close = () => setModal((m) => ({ ...m, open: false }));
+  const openDelete = (item: GalleryItem) => {
+    setErrorMsg(null);
+    setPendingBlobs([]);
+    setModal({ open: true, mode: "delete", item });
+  };
+  const close = () => {
+    setErrorMsg(null);
+    setPendingBlobs([]);
+    setPendingCropQueue([]);
+    setCurrentRawSrc(null);
+    setIsCropOpen(false);
+    setModal((m) => ({ ...m, open: false }));
+  };
 
   const save = async () => {
-    if (!form.title || !form.date) return;
-    const finalPhotos = form.photos.length > 0 ? form.photos : ["https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop"];
+    setErrorMsg(null);
+    if (!form.title || !form.date) {
+      setErrorMsg("Please fill in all required fields (Title, Date).");
+      return;
+    }
+
+    setIsSaving(true);
+    const uploadedPaths: string[] = [];
+    let finalPhotosList = [...form.photos.filter(p => !p.startsWith("blob:"))];
     const entryYear = form.date.split("-")[0] || form.year;
 
     try {
+      // 1. Upload pending cropped blobs to Supabase Storage
+      if (pendingBlobs.length > 0) {
+        for (const blob of pendingBlobs) {
+          const formData = new FormData();
+          formData.append('file', blob, 'gallery-photo.webp');
+          formData.append('bucket', 'media');
+          formData.append('uploadType', 'gallery_photo');
+          if (form.date) {
+            const yearVal = form.date.split('-')[0];
+            if (yearVal) formData.append('year', yearVal);
+          }
+
+          const res = await fetch('/api/v1/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const json = await res.json();
+          if (!res.ok || !json.url) {
+            throw new Error(json.error?.message || 'Failed to upload gallery image.');
+          }
+
+          finalPhotosList.push(json.url);
+          if (json.path) uploadedPaths.push(json.path);
+        }
+      }
+
+      if (finalPhotosList.length === 0) {
+        finalPhotosList = ["https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop"];
+      }
+
+      // 2. Insert / Update Database Record
       if (modal.mode === "add") {
         const res = await fetch('/api/v1/admin/gallery', {
           method: 'POST',
@@ -130,24 +245,36 @@ export default function GalleryPage() {
             title: form.title,
             description: form.description,
             date: form.date,
-            photos: finalPhotos,
+            photos: finalPhotosList,
           }),
         });
-        if (res.ok) {
-          const json = await res.json();
-          if (json.success && json.data) {
-            const album = json.data;
-            const newItem = {
-              id: album.id,
-              title: album.title,
-              description: album.description || '',
-              date: album.eventDate ? album.eventDate.slice(0, 10) : form.date,
-              year: entryYear,
-              photos: finalPhotos,
-              photographer: form.photographer
-            };
-            setItems((prev) => [...prev, newItem]);
+
+        if (!res.ok) {
+          // Rollback storage files on DB error
+          if (uploadedPaths.length > 0) {
+            await fetch('/api/v1/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ bucket: 'media', paths: uploadedPaths }),
+            }).catch(() => {});
           }
+          const json = await res.json().catch(() => ({}));
+          throw new Error(json.error || `Failed to create gallery log (Status ${res.status}).`);
+        }
+
+        const json = await res.json();
+        if (json.success && json.data) {
+          const album = json.data;
+          const newItem = {
+            id: album.id,
+            title: album.title,
+            description: album.description || '',
+            date: album.eventDate ? album.eventDate.slice(0, 10) : form.date,
+            year: entryYear,
+            photos: finalPhotosList,
+            photographer: form.photographer
+          };
+          setItems((prev) => [...prev, newItem]);
         }
       } else if (modal.item) {
         const id = modal.item.id;
@@ -159,30 +286,45 @@ export default function GalleryPage() {
             title: form.title,
             description: form.description,
             date: form.date,
-            photos: finalPhotos,
+            photos: finalPhotosList,
           }),
         });
-        if (res.ok) {
-          setItems((prev) =>
-            prev.map((i) =>
-              i.id === id
-                ? {
-                    ...i,
-                    title: form.title,
-                    description: form.description,
-                    date: form.date,
-                    year: entryYear,
-                    photos: finalPhotos,
-                    photographer: form.photographer
-                  }
-                : i
-            )
-          );
+
+        if (!res.ok) {
+          // Rollback storage files on DB error
+          if (uploadedPaths.length > 0) {
+            await fetch('/api/v1/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ bucket: 'media', paths: uploadedPaths }),
+            }).catch(() => {});
+          }
+          const json = await res.json().catch(() => ({}));
+          throw new Error(json.error || `Failed to update gallery log (Status ${res.status}).`);
         }
+
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === id
+              ? {
+                  ...i,
+                  title: form.title,
+                  description: form.description,
+                  date: form.date,
+                  year: entryYear,
+                  photos: finalPhotosList,
+                  photographer: form.photographer
+                }
+              : i
+          )
+        );
       }
       close();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save gallery album:", err);
+      setErrorMsg(err.message || "An unexpected error occurred.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -351,6 +493,11 @@ export default function GalleryPage() {
       {/* Add / Edit Modal */}
       <Modal isOpen={modal.open && (modal.mode === "add" || modal.mode === "edit")} onClose={close} title={modal.mode === "add" ? "Create Timeline Log Entry" : "Modify Timeline Log"} size="lg">
         <div className="space-y-4">
+          {errorMsg && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+              {errorMsg}
+            </div>
+          )}
           <FormField label="Timeline Title *">
             <Input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. APEX AI Launchpad: Cohort 3 Demo Day" />
           </FormField>
@@ -400,14 +547,16 @@ export default function GalleryPage() {
                 }}
               />
               <UploadCloud size={28} className="text-[#FF6B00] mb-2 mx-auto" />
-              <p className="text-xs font-semibold text-gray-700">Drag & drop your logs images here</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">supporting multiple selections</p>
+              <p className="text-xs font-semibold text-gray-700">
+                Drag & drop your logs images here
+              </p>
+              <p className="text-[10px] text-gray-400 mt-0.5">supporting multiple selections up to 2MB each (stored in media/gallery bucket)</p>
             </div>
           </FormField>
 
           {form.photos.length > 0 && (
             <div>
-              <span className="text-[11px] font-bold text-gray-500 uppercase block mb-2">Uploaded Images ({form.photos.length})</span>
+              <span className="text-[11px] font-bold text-gray-500 uppercase block mb-2">Staged Images ({form.photos.length})</span>
               <div className="flex gap-2 flex-wrap max-h-36 overflow-y-auto p-2 bg-gray-50 rounded-xl border border-gray-100">
                 {form.photos.map((p, idx) => (
                   <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200">
@@ -429,8 +578,10 @@ export default function GalleryPage() {
           )}
 
           <div className="flex justify-end gap-2.5 border-t border-gray-100 pt-4">
-            <GhostBtn onClick={close}>Cancel</GhostBtn>
-            <PrimaryBtn onClick={save}>{modal.mode === "add" ? "Create Entry" : "Save Changes"}</PrimaryBtn>
+            <GhostBtn onClick={close} disabled={isSaving}>Cancel</GhostBtn>
+            <PrimaryBtn onClick={save} disabled={isSaving}>
+              {isSaving ? "Saving..." : modal.mode === "add" ? "Create Entry" : "Save Changes"}
+            </PrimaryBtn>
           </div>
         </div>
       </Modal>
@@ -442,6 +593,21 @@ export default function GalleryPage() {
           <DangerBtn onClick={remove}>Remove Log</DangerBtn>
         </div>
       </Modal>
+
+      {/* CROP MODAL */}
+      {currentRawSrc && (
+        <CropModal
+          isOpen={isCropOpen}
+          imageSrc={currentRawSrc}
+          aspectRatio={4 / 3}
+          onClose={() => {
+            setIsCropOpen(false);
+            setCurrentRawSrc(null);
+            setPendingCropQueue([]);
+          }}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </div>
   );
 }

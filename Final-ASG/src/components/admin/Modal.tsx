@@ -213,13 +213,16 @@ export function PrimaryBtn({
 export function DangerBtn({
   children,
   onClick,
+  disabled,
 }: {
   children: ReactNode;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       style={{
         background: "#ef4444",
         color: "#fff",
@@ -229,7 +232,8 @@ export function DangerBtn({
         fontSize: "14px",
         fontWeight: 600,
         fontFamily: "'Satoshi', sans-serif",
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.6 : 1,
       }}
     >
       {children}
@@ -240,13 +244,16 @@ export function DangerBtn({
 export function GhostBtn({
   children,
   onClick,
+  disabled,
 }: {
   children: ReactNode;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       style={{
         background: "#f4f4f5",
         color: "#555",
@@ -256,7 +263,8 @@ export function GhostBtn({
         fontSize: "14px",
         fontWeight: 500,
         fontFamily: "'Inter', sans-serif",
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.6 : 1,
       }}
     >
       {children}

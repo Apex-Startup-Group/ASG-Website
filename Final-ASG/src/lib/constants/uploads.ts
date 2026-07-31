@@ -23,7 +23,7 @@ export const UPLOAD_CONFIGS: Record<string, UploadConfig> = {
   },
   gallery_photo: {
     label: "Gallery Photo",
-    maxSize: 1 * 1024 * 1024, // 1MB
+    maxSize: 2 * 1024 * 1024, // 2MB
     aspectRatio: 4 / 3,
     maxWidth: 1024,
     bucket: "media",

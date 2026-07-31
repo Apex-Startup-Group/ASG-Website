@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { events } from '@/lib/db/schema/events';
 import { desc, eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { deleteStorageFile } from '@/lib/supabase/service';
 
 export async function GET(req: Request) {
   try {
@@ -115,6 +116,17 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Missing ID parameter' }, { status: 400 });
     }
 
+    // 1. Retrieve target event to fetch thumbnailUrl
+    const existingEvents = await db.select().from(events).where(eq(events.id, id));
+    if (existingEvents.length > 0) {
+      const targetEvent = existingEvents[0];
+      // Delete image from 'media' storage bucket if present
+      if (targetEvent.thumbnailUrl) {
+        await deleteStorageFile(targetEvent.thumbnailUrl, 'media');
+      }
+    }
+
+    // 2. Delete database record
     await db.delete(events).where(eq(events.id, id));
 
     return NextResponse.json({ success: true, message: 'Event deleted successfully' });

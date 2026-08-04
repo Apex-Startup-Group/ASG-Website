@@ -85,15 +85,10 @@ function ContactFormContent() {
   };
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '0.8fr 1.2fr',
-      gap: 'var(--space-6)',
-      alignItems: 'start'
-    }} className="grid-2">
+    <div className="contact-grid">
 
       {/* Left Info Column */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+      <div className="contact-details-col" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
         <div>
           <h3 className="heading-sm" style={{ marginBottom: 'var(--space-2)' }}>Contact Details</h3>
           <p className="body-sm" style={{ color: 'var(--apex-text-muted)', marginBottom: 'var(--space-3)' }}>
@@ -105,7 +100,7 @@ function ContactFormContent() {
           {/* Email */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
-              width: '40px', height: '40px', borderRadius: '50%',
+              width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
               backgroundColor: 'var(--apex-bg-surface)', display: 'flex',
               alignItems: 'center', justifyContent: 'center', color: 'var(--apex-primary)'
             }}>
@@ -113,14 +108,14 @@ function ContactFormContent() {
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: 'var(--apex-text-muted)', display: 'block' }}>Email</span>
-              <a href="mailto:reachus.asg@gmail.com" style={{ fontSize: '0.9rem', fontWeight: '600' }}>reachus.asg@gmail.com</a>
+              <a href="mailto:reachus.asg@gmail.com" style={{ fontSize: '0.9rem', fontWeight: '600', wordBreak: 'break-word' }}>reachus.asg@gmail.com</a>
             </div>
           </div>
 
           {/* Location */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
-              width: '40px', height: '40px', borderRadius: '50%',
+              width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
               backgroundColor: 'var(--apex-bg-surface)', display: 'flex',
               alignItems: 'center', justifyContent: 'center', color: 'var(--apex-primary)'
             }}>
@@ -135,7 +130,7 @@ function ContactFormContent() {
           {/* WhatsApp Community */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
-              width: '40px', height: '40px', borderRadius: '50%',
+              width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
               backgroundColor: 'var(--apex-bg-surface)', display: 'flex',
               alignItems: 'center', justifyContent: 'center', color: 'var(--apex-primary)'
             }}>
@@ -177,7 +172,7 @@ function ContactFormContent() {
       </div>
 
       {/* Right Form Column */}
-      <div style={{
+      <div className="contact-form-col" style={{
         backgroundColor: 'var(--apex-bg-surface)',
         border: '1px solid var(--apex-border-dark)',
         borderRadius: 'var(--radius-lg)',

@@ -61,26 +61,31 @@ function toExpertRecord(row: any): ExpertRecord {
 export async function getExpertsAction(options?: { publicOnly?: boolean }): Promise<ExpertRecord[]> {
   const publicOnly = options?.publicOnly ?? false;
 
-  const rows = await db
-    .select({
-      id: industryExperts.id,
-      name: industryExperts.name,
-      photo: industryExperts.photo,
-      designation: industryExperts.designation,
-      company: industryExperts.company,
-      domain: industryExperts.domain,
-      linkedinUrl: industryExperts.linkedinUrl,
-      websiteUrl: industryExperts.websiteUrl,
-      bio: industryExperts.bio,
-      showOnWebsite: industryExperts.showOnWebsite,
-      createdAt: industryExperts.createdAt,
-      updatedAt: industryExperts.updatedAt,
-    })
-    .from(industryExperts)
-    .where(publicOnly ? eq(industryExperts.showOnWebsite, true) : undefined)
-    .orderBy(asc(industryExperts.displayOrder), asc(industryExperts.name));
+  try {
+    const rows = await db
+      .select({
+        id: industryExperts.id,
+        name: industryExperts.name,
+        photo: industryExperts.photo,
+        designation: industryExperts.designation,
+        company: industryExperts.company,
+        domain: industryExperts.domain,
+        linkedinUrl: industryExperts.linkedinUrl,
+        websiteUrl: industryExperts.websiteUrl,
+        bio: industryExperts.bio,
+        showOnWebsite: industryExperts.showOnWebsite,
+        createdAt: industryExperts.createdAt,
+        updatedAt: industryExperts.updatedAt,
+      })
+      .from(industryExperts)
+      .where(publicOnly ? eq(industryExperts.showOnWebsite, true) : undefined)
+      .orderBy(asc(industryExperts.displayOrder), asc(industryExperts.name));
 
-  return rows.map(toExpertRecord);
+    return rows.map(toExpertRecord);
+  } catch (err) {
+    console.error('Error fetching industry experts:', err);
+    return [];
+  }
 }
 
 export async function createExpertAction(input: ExpertInput): Promise<ExpertRecord> {

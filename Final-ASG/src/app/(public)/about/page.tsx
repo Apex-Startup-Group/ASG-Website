@@ -23,7 +23,7 @@ export default function AboutPage() {
       {/* Origin Story Section */}
       <section className="section" style={{ paddingTop: 0 }}>
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 'var(--space-6)', alignItems: 'center' }} className="grid-2">
+          <div className="hero-grid">
             
             {/* Left Column: Text */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
@@ -63,7 +63,7 @@ export default function AboutPage() {
       {/* Mission & Vision Section */}
       <section className="section" style={{ background: 'var(--apex-bg-surface-elevated)' }}>
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }} className="grid-2">
+          <div className="grid-2">
             
             {/* Mission Card */}
             <article style={{ background: 'var(--apex-bg-surface)', border: '1px solid var(--apex-border-dark)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)', boxShadow: 'var(--shadow-sm)' }}>

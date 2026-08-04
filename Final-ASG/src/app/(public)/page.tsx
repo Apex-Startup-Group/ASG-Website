@@ -12,8 +12,8 @@ export default async function Page() {
   let fetchedBlogs = [];
   let fetchedTestimonials = [];
 
+  // 1. Fetch Events safely
   try {
-    // 1. Fetch Events
     const rawEvents = await db.select().from(events).orderBy(desc(events.scheduledDate));
     fetchedEvents = rawEvents.map((event) => ({
       id: String(event.id),
@@ -31,8 +31,12 @@ export default async function Page() {
           })
         : '',
     }));
+  } catch (error) {
+    console.error('Error fetching events for homepage:', error);
+  }
 
-    // 2. Fetch Gallery Albums and Photos
+  // 2. Fetch Gallery Albums and Photos safely
+  try {
     const rawAlbums = await db.select().from(galleryAlbums).orderBy(desc(galleryAlbums.eventDate));
     const rawPhotos = await db.select().from(galleryPhotos).orderBy(asc(galleryPhotos.displayOrder));
 
@@ -57,8 +61,12 @@ export default async function Page() {
         tags: [],
       };
     });
+  } catch (error) {
+    console.error('Error fetching gallery entries for homepage:', error);
+  }
 
-    // 3. Fetch Blogs
+  // 3. Fetch Blogs safely
+  try {
     const rawBlogs = await db
       .select()
       .from(blogs)
@@ -87,12 +95,15 @@ export default async function Page() {
           }),
       readTime: Math.ceil((post.body?.split(' ').length || 0) / 200) + ' min read',
     }));
-
-    // 4. Fetch Active Testimonials
-    fetchedTestimonials = await getTestimonialsAction({ publicOnly: true });
-
   } catch (error) {
-    console.error('Error loading homepage data from Database via Drizzle:', error);
+    console.error('Error fetching blogs for homepage:', error);
+  }
+
+  // 4. Fetch Active Testimonials safely
+  try {
+    fetchedTestimonials = await getTestimonialsAction({ publicOnly: true });
+  } catch (error) {
+    console.error('Error fetching testimonials for homepage:', error);
   }
 
   return (

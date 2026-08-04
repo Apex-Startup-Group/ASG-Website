@@ -246,7 +246,7 @@ function ListingsContent() {
       ) : (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
           gap: 'var(--space-4)',
           marginTop: 'var(--space-4)'
         }} className="grid-3">

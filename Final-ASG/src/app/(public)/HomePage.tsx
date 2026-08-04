@@ -172,18 +172,10 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
     <PageWrapper>
       <section className="section" style={{ minHeight: '90vh', display: 'flex', alignItems: 'center' }}>
         <div className="container">
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1.2fr 0.8fr',
-              gap: 'var(--space-6)',
-              alignItems: 'center',
-            }}
-            className="grid-2"
-          >
+          <div className="hero-grid">
             <div>
               <span className="label hero-overline" style={{ color: 'var(--apex-primary)', marginBottom: 'var(--space-2)', display: 'block', opacity: 0 }}>
-                APEX — JALGAON'S STARTUP ECOSYSTEM
+                APEX - JALGAON'S STARTUP ECOSYSTEM
               </span>
               <h1 className="display-xl hero-title" style={{ marginBottom: 'var(--space-4)', color: 'var(--apex-text-white)', opacity: 0 }}>
                 Where Startups Meet Talent, Mentors, and <br />
@@ -226,21 +218,6 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
                 }}>
                   Join ASG Community
                 </Link>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: 'var(--space-4)',
-                borderTop: '1px solid var(--apex-border-dark)',
-                paddingTop: 'var(--space-4)',
-                flexWrap: 'wrap',
-                color: 'var(--apex-text-muted)',
-                fontSize: '0.9rem',
-              }}>
-                <div className="hero-trust-item" style={{ opacity: 0 }}><strong>120+</strong> Interns Trained</div>
-                <div className="hero-trust-item" style={{ opacity: 0 }}><strong>40+</strong> Mentors & Experts</div>
-                <div className="hero-trust-item" style={{ opacity: 0 }}><strong>40+</strong> Events Hosted</div>
-                <div className="hero-trust-item" style={{ opacity: 0 }}><strong>44+</strong> Completed Cohorts</div>
               </div>
             </div>
 
@@ -344,7 +321,7 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
       <section ref={splitAnim.ref} className={`section ${splitAnim.className}`}>
         <div className="container">
           <SectionHeading overline="Dual Programs" title="Two Pillars. One Platform." subtitle="APEX unifies startup growth circles and AI launchpad initiatives under a single collaborative ecosystem." />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }} className="grid-2">
+          <div className="grid-2">
             <div style={{
               backgroundColor: 'var(--apex-bg-surface)',
               border: '1px solid var(--apex-border-dark)',
@@ -418,12 +395,12 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
 
       <section ref={eventsAnim.ref} className={`section ${eventsAnim.className}`} style={{ backgroundColor: 'var(--apex-bg-surface-elevated)' }}>
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-5)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-5)', flexWrap: 'wrap', gap: '16px' }}>
             <SectionHeading overline="Upcoming Events" title="Join Our Next Event" subtitle="Participate in hands-on workshops, networking meetups, and expert panels." align="left" />
             <Link href="/events" className="btn" style={{
               color: 'var(--apex-primary)',
               fontWeight: '600',
-              marginBottom: 'var(--space-6)',
+              marginBottom: 'var(--space-3)',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
@@ -432,7 +409,7 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }} className="grid-2">
+          <div className="grid-2">
             {featuredEvents.map((item) => (
               <div key={item.id} style={{
                 backgroundColor: 'var(--apex-bg-surface)',
@@ -478,12 +455,12 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
 
       <section ref={galleryAnim.ref} className={`section ${galleryAnim.className}`}>
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-5)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-5)', flexWrap: 'wrap', gap: '16px' }}>
             <SectionHeading overline="Visual Timeline" title="Moments in the Ecosystem" subtitle="Take a look at snapshots of our past demo days, cohorts, and meetups." align="left" />
             <Link href="/gallery" style={{
               color: 'var(--apex-primary)',
               fontWeight: '600',
-              marginBottom: 'var(--space-6)',
+              marginBottom: 'var(--space-3)',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
@@ -492,7 +469,7 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-4)' }} className="grid-3">
+          <div className="grid-3">
             {galleryEntries.slice(0, 3).map((entry, entryIndex) => (
               <div key={entry.id} style={{
                 backgroundColor: 'var(--apex-bg-surface)',
@@ -558,12 +535,12 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
 
       <section className="section" style={{ borderTop: '1px solid var(--apex-border-dark)' }}>
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-5)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-5)', flexWrap: 'wrap', gap: '16px' }}>
             <SectionHeading overline="Insights & Ideas" title="Ecosystem Blogs" subtitle="Thoughts, tutorials, and success stories from the APEX Startup Group and AI Launchpad cohorts." align="left" />
             <Link href="/blogs" className="btn" style={{
               color: 'var(--apex-primary)',
               fontWeight: '600',
-              marginBottom: 'var(--space-6)',
+              marginBottom: 'var(--space-3)',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
@@ -572,7 +549,7 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-4)' }} className="grid-3">
+          <div className="grid-3">
             {blogs.slice(0, 3).map((blog) => (
               <article
                 key={blog.id}
@@ -647,7 +624,7 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
         <div className="container">
           <SectionHeading overline="What ASG Members Say" title="Community Voices" subtitle="Read real feedback from students, founders, and investors building in North Maharashtra." />
           {testimonials && testimonials.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-4)' }} className="grid-3">
+            <div className="grid-3">
               {testimonials.map((t) => (
                 <div
                   key={t.id}
@@ -707,7 +684,7 @@ export default function HomePage({ events, galleryEntries, blogs, testimonials =
         </div>
       </section>
 
-      <div style={{
+      <div className="hidden lg:flex" style={{
         position: 'fixed',
         right: '20px',
         top: '50%',

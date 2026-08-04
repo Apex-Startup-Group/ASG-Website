@@ -81,11 +81,7 @@ export default function BlogsList({ posts }: { posts: any[] }) {
             </div>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 'var(--space-4)'
-          }} className="grid-3">
+          <div className="grid-3">
             {filteredBlogs.map((blog) => (
               <article
                 key={blog.id}

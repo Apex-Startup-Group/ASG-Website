@@ -192,7 +192,7 @@ export default function ASG() {
             title="The Four Ecosystem Nodes"
             subtitle="ASG is built upon collaborative support structures matching founders, mentors, investors, and service partners. Click on any card to view ecosystem members."
           />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }} className="grid-2">
+          <div className="grid-2">
             {pillars.map((p) => {
               return (
                 <div
@@ -292,7 +292,7 @@ export default function ASG() {
               <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
 
                 {/* Name & Email Row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }} className="grid-2">
+                <div className="grid-2">
                   {/* Name */}
                   <div>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--apex-text-white)', display: 'block', marginBottom: '6px' }}>Full Name *</label>
@@ -339,7 +339,7 @@ export default function ASG() {
                 </div>
 
                 {/* Phone & Role Row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }} className="grid-2">
+                <div className="grid-2">
                   {/* Phone */}
                   <div>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--apex-text-white)', display: 'block', marginBottom: '6px' }}>Phone Number *</label>
@@ -419,7 +419,7 @@ export default function ASG() {
                 )}
 
                 {/* Company & Website Row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }} className="grid-2">
+                <div className="grid-2">
                   {/* Company / Affiliation */}
                   <div>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--apex-text-white)', display: 'block', marginBottom: '6px' }}>Company / Affiliation *</label>
@@ -601,7 +601,7 @@ export default function ASG() {
             title="ASG Programs & Initiatives"
             subtitle="We run recurring monthly, bi-weekly, and annual formats to keep stakeholders engaged."
           />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-3)' }} className="grid-4">
+          <div className="grid-4">
             {recurrentPrograms.map((prog) => (
               <div key={prog.title} style={{
                 backgroundColor: 'var(--apex-bg-surface)',

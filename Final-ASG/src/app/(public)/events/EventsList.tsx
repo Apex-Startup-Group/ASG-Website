@@ -65,7 +65,7 @@ export default function EventsList({ events, galleryEntries }) {
 
           {/* Events List */}
           {filteredEvents.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }} className="grid-2">
+            <div className="grid-2">
               {filteredEvents.map((item) => (
                 <div
                   key={item.id}

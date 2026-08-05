@@ -10,9 +10,10 @@ interface ImageUploadProps {
   uploadType: keyof typeof UPLOAD_CONFIGS;
   value?: string;
   onChange: (url: string) => void;
+  allowFlexibleCrop?: boolean;
 }
 
-export default function ImageUpload({ uploadType, value, onChange }: ImageUploadProps) {
+export default function ImageUpload({ uploadType, value, onChange, allowFlexibleCrop = true }: ImageUploadProps) {
   const config = UPLOAD_CONFIGS[uploadType];
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -240,6 +241,7 @@ export default function ImageUpload({ uploadType, value, onChange }: ImageUpload
           isOpen={isCropOpen}
           imageSrc={imageSrc}
           aspectRatio={config.aspectRatio}
+          allowFlexibleAspect={allowFlexibleCrop}
           onClose={() => {
             setIsCropOpen(false);
             setImageSrc(null);

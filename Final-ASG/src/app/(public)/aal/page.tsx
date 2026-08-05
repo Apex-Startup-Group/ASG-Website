@@ -305,11 +305,7 @@ export default function AAL() {
             title="Explore Internship Projects"
             subtitle="Take on one of these 12 specialized startup projects. Click on any project card to see its active interns."
           />
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 'var(--space-4)'
-          }} className="grid-3">
+          <div className="grid-3">
             {problemStatements.map((d) => (
               <div
                 key={d.id}
@@ -677,7 +673,7 @@ export default function AAL() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }} className="grid-2">
+                <div className="grid-2">
                   {/* Name */}
                   <div>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--apex-text-white)', display: 'block', marginBottom: '6px' }}>Full Name *</label>
@@ -723,7 +719,7 @@ export default function AAL() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }} className="grid-2">
+                <div className="grid-2">
                   {/* Phone */}
                   <div>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--apex-text-white)', display: 'block', marginBottom: '6px' }}>Phone Number *</label>
@@ -769,7 +765,7 @@ export default function AAL() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }} className="grid-2">
+                <div className="grid-2">
                   {/* College / University */}
                   <div>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--apex-text-white)', display: 'block', marginBottom: '6px' }}>College / University Name *</label>
@@ -849,7 +845,7 @@ export default function AAL() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }} className="grid-2">
+                <div className="grid-2">
                   {/* Year of Study */}
                   <div>
                     <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--apex-text-white)', display: 'block', marginBottom: '6px' }}>Year of Study *</label>

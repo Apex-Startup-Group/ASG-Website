@@ -54,15 +54,16 @@ export default function Lightbox({ images, currentIndex, onClose, onPrev, onNext
         onClick={onClose}
         style={{
           position: 'absolute',
-          top: '24px',
-          right: '24px',
+          top: '16px',
+          right: '16px',
+          zIndex: 20,
           background: 'none',
           border: 'none',
           color: '#fff',
           cursor: 'pointer',
           padding: '8px',
           borderRadius: '50%',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          backgroundColor: 'rgba(255, 255, 255, 0.15)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -79,14 +80,15 @@ export default function Lightbox({ images, currentIndex, onClose, onPrev, onNext
           onClick={(e) => { e.stopPropagation(); onPrev(); }}
           style={{
             position: 'absolute',
-            left: '24px',
+            left: '12px',
+            zIndex: 20,
             background: 'none',
             border: 'none',
             color: '#fff',
             cursor: 'pointer',
-            padding: '12px',
+            padding: '10px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -94,15 +96,15 @@ export default function Lightbox({ images, currentIndex, onClose, onPrev, onNext
           }}
           aria-label="Previous image"
         >
-          <ChevronLeft size={28} />
+          <ChevronLeft size={24} />
         </button>
       )}
 
       {/* Main Image */}
       <div 
         style={{
-          maxWidth: '85%',
-          maxHeight: '80%',
+          maxWidth: '90%',
+          maxHeight: '85%',
           position: 'relative'
         }}
         onClick={(e) => e.stopPropagation()}
@@ -112,7 +114,7 @@ export default function Lightbox({ images, currentIndex, onClose, onPrev, onNext
           alt={`Gallery view ${currentIndex + 1}`}
           style={{
             maxWidth: '100%',
-            maxHeight: '80vh',
+            maxHeight: '75vh',
             objectFit: 'contain',
             borderRadius: 'var(--radius-md)',
             boxShadow: 'var(--shadow-lg)'
@@ -122,9 +124,9 @@ export default function Lightbox({ images, currentIndex, onClose, onPrev, onNext
         {/* Caption count indicator */}
         <div style={{
           textAlign: 'center',
-          marginTop: '16px',
+          marginTop: '12px',
           color: 'var(--apex-text-muted)',
-          fontSize: '0.9rem'
+          fontSize: '0.85rem'
         }}>
           Image {currentIndex + 1} of {images.length}
         </div>
@@ -136,14 +138,15 @@ export default function Lightbox({ images, currentIndex, onClose, onPrev, onNext
           onClick={(e) => { e.stopPropagation(); onNext(); }}
           style={{
             position: 'absolute',
-            right: '24px',
+            right: '12px',
+            zIndex: 20,
             background: 'none',
             border: 'none',
             color: '#fff',
             cursor: 'pointer',
-            padding: '12px',
+            padding: '10px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -151,7 +154,7 @@ export default function Lightbox({ images, currentIndex, onClose, onPrev, onNext
           }}
           aria-label="Next image"
         >
-          <ChevronRight size={28} />
+          <ChevronRight size={24} />
         </button>
       )}
     </div>

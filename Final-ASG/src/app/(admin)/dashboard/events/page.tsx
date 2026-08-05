@@ -33,6 +33,9 @@ import Modal, {
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { PageHeader } from "@/components/admin/PageHeader";
 
+import CropModal from "@/components/shared/CropModal";
+import { getCroppedImg, Area } from "@/lib/utils/image";
+
 interface Event {
   id: string | number;
   title: string;
@@ -51,7 +54,6 @@ const CATEGORIES = ["Workshop", "Meetup", "Expert Session", "Demo Day", "Founder
 const STATUSES = ["upcoming", "past"] as const;
 
 const INITIAL_EVENTS: Event[] = [];
-
 
 const emptyForm: Omit<Event, "id"> = {
   title: "",
@@ -87,6 +89,54 @@ export default function EventsPage() {
   const [form, setForm] = useState<Omit<Event, "id">>(emptyForm);
   const [tagsInput, setTagsInput] = useState("");
   const [dragActive, setDragActive] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const res = await fetch('/api/v1/admin/events');
+        if (res.ok) {
+          const { data } = await res.json();
+          if (data) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const mapped = data.map((e: any) => {
+              let computedStatus: "upcoming" | "past" = e.status || "upcoming";
+              if (e.scheduledDate) {
+                const eventDate = new Date(e.scheduledDate);
+                eventDate.setHours(0, 0, 0, 0);
+                computedStatus = eventDate < today ? "past" : "upcoming";
+              }
+              if (e.status === "past" || e.status === "completed") computedStatus = "past";
+
+              return {
+                id: e.id,
+                title: e.title,
+                type: e.type || 'Meetup',
+                date: e.scheduledDate ? e.scheduledDate.slice(0, 10) : '',
+                venue: e.venue || '',
+                status: computedStatus,
+                thumbnail: e.thumbnailUrl || '',
+                description: e.description || '',
+                tags: e.tags || [],
+              };
+            });
+            setEvents(mapped);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load admin events:", err);
+      }
+    }
+    loadEvents();
+  }, [setEvents]);
+
+  // Staged Image Cropping State
+  const [rawImageSrc, setRawImageSrc] = useState<string | null>(null);
+  const [isCropOpen, setIsCropOpen] = useState(false);
+  const [pendingBlob, setPendingBlob] = useState<Blob | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -98,52 +148,53 @@ export default function EventsPage() {
     }
   };
 
-  useEffect(() => {
-    async function loadEvents() {
-      try {
-        const res = await fetch('/api/v1/admin/events');
-        if (res.ok) {
-          const { data } = await res.json();
-          if (data) {
-            const mapped = data.map((e: any) => ({
-              id: e.id,
-              title: e.title,
-              type: e.type || 'Meetup',
-              date: e.scheduledDate ? e.scheduledDate.slice(0, 10) : '',
-              venue: e.venue || '',
-              status: e.status || 'draft',
-              thumbnail: e.thumbnailUrl || '',
-              description: e.description || '',
-              tags: e.tags || [],
-            }));
-            setEvents(mapped);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load admin events:", err);
-      }
-    }
-    loadEvents();
-  }, [setEvents]);
-
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
+      handleFileSelect(e.dataTransfer.files[0]);
     }
   };
 
-  const handleFile = (file: File) => {
-    if (!file.type.startsWith("image/")) return;
+  const handleFileSelect = (file: File) => {
+    setErrorMsg(null);
+    if (!file.type.startsWith("image/")) {
+      setErrorMsg("Selected file is not a valid image format.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setErrorMsg("Image size exceeds 2MB limit. Please select a smaller image file.");
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setField("thumbnail", event.target.result as string);
-      }
+    reader.onload = () => {
+      setRawImageSrc(reader.result as string);
+      setIsCropOpen(true);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleCropConfirm = async (pixelCrop: Area) => {
+    setIsCropOpen(false);
+    if (!rawImageSrc) return;
+    try {
+      const croppedBlob = await getCroppedImg(rawImageSrc, pixelCrop, 1200);
+      if (croppedBlob) {
+        setPendingBlob(croppedBlob);
+        const previewUrl = URL.createObjectURL(croppedBlob);
+        setField("thumbnail", previewUrl);
+      }
+    } catch (err: any) {
+      setErrorMsg("Failed to crop image.");
+    } finally {
+      setRawImageSrc(null);
+    }
+  };
+
+  const setField = (field: keyof Omit<Event, "id">, value: any) => {
+    setForm((f) => ({ ...f, [field]: value }));
   };
 
   const metrics = useMemo(() => {
@@ -201,16 +252,24 @@ export default function EventsPage() {
   };
 
   const openAdd = () => {
+    setErrorMsg(null);
+    setPendingBlob(null);
+    setRawImageSrc(null);
     setForm(emptyForm);
     setTagsInput("");
     setModal({ open: true, mode: "add", item: null });
   };
 
   const openView = (item: Event) => {
+    setErrorMsg(null);
+    setPendingBlob(null);
     setModal({ open: true, mode: "view", item });
   };
 
   const openEdit = (item: Event) => {
+    setErrorMsg(null);
+    setPendingBlob(null);
+    setRawImageSrc(null);
     setForm({
       title: item.title,
       type: item.type,
@@ -228,45 +287,100 @@ export default function EventsPage() {
   };
 
   const openDelete = (item: Event) => {
+    setErrorMsg(null);
+    setPendingBlob(null);
     setModal({ open: true, mode: "delete", item });
   };
 
-  const close = () => setModal((m) => ({ ...m, open: false }));
+  const close = () => {
+    setErrorMsg(null);
+    setPendingBlob(null);
+    setRawImageSrc(null);
+    setIsCropOpen(false);
+    setModal((m) => ({ ...m, open: false }));
+  };
 
   const save = async () => {
-    if (!form.title || !form.date || !form.venue) return;
-    const parsedTags = tagsInput
-      .split(",")
-      .map(t => t.trim())
-      .filter(t => t.length > 0)
-      .map(t => (t.startsWith("#") ? t : `#${t}`));
+    setErrorMsg(null);
+    if (!form.title || !form.date || !form.venue) {
+      setErrorMsg("Please fill in all required fields (Title, Date, Venue).");
+      return;
+    }
 
-    const finalForm = { ...form, tags: parsedTags };
+    setIsSaving(true);
+    let uploadedPath = "";
+    let finalThumbnailUrl = form.thumbnail;
 
     try {
+      // 1. Upload pending cropped image if present
+      if (pendingBlob) {
+        const formData = new FormData();
+        formData.append('file', pendingBlob, 'event-banner.webp');
+        formData.append('bucket', 'media');
+        formData.append('uploadType', 'event_banner');
+        if (form.date) {
+          const yearVal = form.date.split('-')[0];
+          if (yearVal) formData.append('year', yearVal);
+        }
+
+        const uploadRes = await fetch('/api/v1/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const uploadJson = await uploadRes.json();
+        if (!uploadRes.ok || !uploadJson.url) {
+          throw new Error(uploadJson.error?.message || 'Failed to upload event banner to storage.');
+        }
+
+        finalThumbnailUrl = uploadJson.url;
+        uploadedPath = uploadJson.path;
+      }
+
+      const parsedTags = tagsInput
+        .split(",")
+        .map(t => t.trim())
+        .filter(t => t.length > 0)
+        .map(t => (t.startsWith("#") ? t : `#${t}`));
+
+      const finalForm = { ...form, thumbnail: finalThumbnailUrl, tags: parsedTags };
+
+      // 2. Database Insert / Update
       if (modal.mode === "add") {
         const res = await fetch('/api/v1/admin/events', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(finalForm),
         });
-        if (res.ok) {
-          const json = await res.json();
-          if (json.success && json.data) {
-            const e = json.data;
-            const newEvent = {
-              id: e.id,
-              title: e.title,
-              type: e.type || 'Meetup',
-              date: e.scheduledDate ? e.scheduledDate.slice(0, 10) : '',
-              venue: e.venue || '',
-              status: e.status || 'draft',
-              thumbnail: e.thumbnailUrl || '',
-              description: e.description || '',
-              tags: e.tags || [],
-            };
-            setEvents((prev) => [newEvent, ...prev]);
+
+        if (!res.ok) {
+          // Rollback storage file on DB error
+          if (uploadedPath) {
+            await fetch('/api/v1/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ bucket: 'media', paths: [uploadedPath] }),
+            }).catch(() => {});
           }
+          const json = await res.json().catch(() => ({}));
+          throw new Error(json.error || `Failed to create event (Status ${res.status}).`);
+        }
+
+        const json = await res.json();
+        if (json.success && json.data) {
+          const e = json.data;
+          const newEvent = {
+            id: e.id,
+            title: e.title,
+            type: e.type || 'Meetup',
+            date: e.scheduledDate ? e.scheduledDate.slice(0, 10) : '',
+            venue: e.venue || '',
+            status: e.status || 'draft',
+            thumbnail: e.thumbnailUrl || '',
+            description: e.description || '',
+            tags: e.tags || [],
+          };
+          setEvents((prev) => [newEvent, ...prev]);
         }
       } else if (modal.item) {
         const id = modal.item.id;
@@ -275,29 +389,44 @@ export default function EventsPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...finalForm, id }),
         });
-        if (res.ok) {
-          setEvents((prev) =>
-            prev.map((e) =>
-              e.id === id
-                ? {
-                    ...e,
-                    title: form.title,
-                    type: form.type,
-                    date: form.date,
-                    venue: form.venue,
-                    status: form.status,
-                    thumbnail: form.thumbnail,
-                    description: form.description,
-                    tags: parsedTags,
-                  }
-                : e
-            )
-          );
+
+        if (!res.ok) {
+          // Rollback storage file on DB error
+          if (uploadedPath) {
+            await fetch('/api/v1/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ bucket: 'media', paths: [uploadedPath] }),
+            }).catch(() => {});
+          }
+          const json = await res.json().catch(() => ({}));
+          throw new Error(json.error || `Failed to update event (Status ${res.status}).`);
         }
+
+        setEvents((prev) =>
+          prev.map((e) =>
+            e.id === id
+              ? {
+                  ...e,
+                  title: form.title,
+                  type: form.type,
+                  date: form.date,
+                  venue: form.venue,
+                  status: form.status,
+                  thumbnail: finalThumbnailUrl,
+                  description: form.description,
+                  tags: parsedTags,
+                }
+              : e
+          )
+        );
       }
       close();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save event:", err);
+      setErrorMsg(err.message || "An unexpected error occurred.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -317,9 +446,6 @@ export default function EventsPage() {
     }
     close();
   };
-
-  const setField = (k: keyof typeof form, v: any) =>
-    setForm((f) => ({ ...f, [k]: v }));
 
   return (
     <div className="max-w-[1600px] mx-auto p-1 animate-fade-in">
@@ -575,6 +701,11 @@ export default function EventsPage() {
       {/* ADD / EDIT FORM MODAL */}
       <Modal isOpen={modal.open && (modal.mode === "add" || modal.mode === "edit")} onClose={close} title={modal.mode === "add" ? "Create Ecosystem Event" : "Modify Event Settings"} size="lg">
         <div className="space-y-4">
+          {errorMsg && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+              {errorMsg}
+            </div>
+          )}
           <FormField label="Event Title *">
             <Input value={form.title} onChange={(e) => setField("title", e.target.value)} placeholder="e.g. AI Agents Buildathon" />
           </FormField>
@@ -628,7 +759,7 @@ export default function EventsPage() {
                 className="hidden"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
-                    handleFile(e.target.files[0]);
+                    handleFileSelect(e.target.files[0]);
                   }
                 }}
               />
@@ -639,23 +770,25 @@ export default function EventsPage() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <UploadCloud size={30} className="text-[#FF6B00] mb-2" />
-                  <p className="text-xs font-semibold text-gray-700">Drag & drop your thumbnail image here</p>
-                  <p className="text-[10px] text-gray-400 mt-1">or click to browse local folders</p>
+                  <UploadCloud size={28} className="text-[#FF6B00] mb-2 mx-auto" />
+                  <p className="text-xs font-semibold text-gray-700">
+                    Drag & drop event thumbnail banner here
+                  </p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">JPG, PNG, WEBP up to 2MB (stored in media/Event bucket)</p>
                 </div>
               )}
             </div>
           </FormField>
-
-
 
           <FormField label="Ecosystem Description">
             <Textarea value={form.description} onChange={(e) => setField("description", e.target.value)} placeholder="Detailed summary of this ecosystem event..." />
           </FormField>
 
           <div className="flex justify-end gap-2.5 border-t border-gray-100 pt-4">
-            <GhostBtn onClick={close}>Cancel</GhostBtn>
-            <PrimaryBtn onClick={save}>{modal.mode === "add" ? "Create Event" : "Save Changes"}</PrimaryBtn>
+            <GhostBtn onClick={close} disabled={isSaving}>Cancel</GhostBtn>
+            <PrimaryBtn onClick={save} disabled={isSaving}>
+              {isSaving ? "Saving..." : modal.mode === "add" ? "Create Event" : "Save Changes"}
+            </PrimaryBtn>
           </div>
         </div>
       </Modal>
@@ -664,17 +797,28 @@ export default function EventsPage() {
       <Modal isOpen={modal.open && modal.mode === "delete"} onClose={close} title="Confirm Event Deletion" size="sm">
         {modal.item && (
           <div className="space-y-4">
-            <p className="text-xs text-gray-600">
-              Are you absolutely sure you want to delete the event <strong>"{modal.item.title}"</strong>?
-            </p>
-            <div className="flex justify-end gap-2.5 pt-2 border-t border-gray-100">
+            <p className="text-xs text-gray-600">Are you sure you want to remove the event <strong>"{modal.item.title}"</strong>?</p>
+            <div className="flex justify-end gap-2.5 border-t border-gray-100 pt-4">
               <GhostBtn onClick={close}>Cancel</GhostBtn>
-              <DangerBtn onClick={remove}>Confirm Delete</DangerBtn>
+              <DangerBtn onClick={remove}>Remove Event</DangerBtn>
             </div>
           </div>
         )}
       </Modal>
+
+      {/* CROP MODAL */}
+      {rawImageSrc && (
+        <CropModal
+          isOpen={isCropOpen}
+          imageSrc={rawImageSrc}
+          aspectRatio={16 / 9}
+          onClose={() => {
+            setIsCropOpen(false);
+            setRawImageSrc(null);
+          }}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </div>
   );
 }
-

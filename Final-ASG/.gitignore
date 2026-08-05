@@ -18,6 +18,10 @@ dist-ssr
 
 
 
+# Scratch scripts & temporary data
+scratch/
+scratch/*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

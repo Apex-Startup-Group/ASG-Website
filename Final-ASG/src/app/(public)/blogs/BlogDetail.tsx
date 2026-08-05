@@ -207,7 +207,7 @@ export default function BlogDetail({ blog, relatedBlogs }) {
           {relatedBlogs && relatedBlogs.length > 0 && (
             <div style={{ marginTop: 'var(--space-10)' }}>
               <h3 style={{ color: 'var(--apex-text-white)', marginBottom: 'var(--space-4)' }}>Related Articles</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-4)' }}>
+              <div className="grid-3">
                 {relatedBlogs.map((related) => (
                   <div key={related.id} style={{ backgroundColor: 'var(--apex-bg-surface)', border: '1px solid var(--apex-border-dark)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', padding: 'var(--space-4)' }}>
                     <h4 style={{ marginBottom: '10px', color: 'var(--apex-text-white)' }}>{related.title}</h4>

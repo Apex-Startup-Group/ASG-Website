@@ -39,7 +39,7 @@ export default function AALEcosystemDirectory() {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }} className="grid-3">
+        <div className="grid-3" style={{ marginBottom: 'var(--space-6)' }}>
           {experts.map((expert) => (
             <article key={expert.id} style={{ background: 'var(--apex-bg-surface)', border: '1px solid var(--apex-border-dark)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
               <img

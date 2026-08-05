@@ -93,25 +93,28 @@ export default function GalleryPage({ entries }) {
         </div>
 
         {filteredEntries.length > 0 ? (
-          <div style={{ position: 'relative', maxWidth: '850px', margin: '0 auto', padding: '20px 0' }}>
-            <div style={{ position: 'absolute', left: '120px', top: '10px', bottom: '10px', width: '2px', background: 'var(--apex-border-dark)', zIndex: 1 }} />
+          <div className="gallery-timeline-container">
+            <div className="gallery-timeline-line" />
             {filteredEntries.map((entry) => (
-              <div key={entry.id} id={`gallery-entry-${entry.id}`} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 'var(--space-7)', position: 'relative' }}>
-                <div style={{ width: '100px', textAlign: 'right', paddingRight: '24px', paddingTop: '6px', fontSize: '0.9rem', fontWeight: '800', color: 'var(--apex-primary)', fontFamily: 'Fira Code, monospace', zIndex: 2 }}>
+              <div key={entry.id} id={`gallery-entry-${entry.id}`} className="gallery-timeline-entry">
+                <div className="gallery-date-col">
                   {entry.eventDate?.slice(5, 10)}
                   <div style={{ fontSize: '0.75rem', fontWeight: '500', color: 'var(--apex-text-muted)', marginTop: '2px' }}>
                     {entry.eventDate?.slice(0, 4)}
                   </div>
                 </div>
-                <div style={{ position: 'absolute', left: '121px', top: '14px', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--apex-primary)', transform: 'translateX(-50%)', zIndex: 2, boxShadow: '0 0 0 4px var(--apex-bg-base)' }} />
-                <div style={{ flex: 1, marginLeft: '40px', backgroundColor: 'var(--apex-bg-surface)', border: '1px solid var(--apex-border-dark)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 0, transition: 'border-color var(--transition-base), box-shadow var(--transition-base)' }}>
-                  <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', justifySelf: 'stretch', justifyContent: 'space-between' }}>
+                <div className="gallery-timeline-dot" />
+                <div className="gallery-card">
+                  <div className="gallery-card-content">
                     <div>
+                      <span className="gallery-mobile-date">
+                        {entry.eventDate?.slice(0, 10)}
+                      </span>
                       <h4 className="heading-sm" style={{ fontSize: '1.2rem', marginBottom: '10px', color: 'var(--apex-text-white)' }}>{entry.title}</h4>
                       <p className="body-sm" style={{ color: 'var(--apex-text-muted)', lineHeight: '1.6' }}>{entry.description}</p>
                     </div>
                   </div>
-                  <div style={{ position: 'relative', overflow: 'hidden', height: '100%', minHeight: '220px', backgroundColor: 'var(--apex-bg-surface-elevated)' }}>
+                  <div className="gallery-card-media">
                     <img
                       src={entry.coverPhoto}
                       alt={entry.title}

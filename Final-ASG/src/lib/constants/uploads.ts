@@ -23,7 +23,7 @@ export const UPLOAD_CONFIGS: Record<string, UploadConfig> = {
   },
   gallery_photo: {
     label: "Gallery Photo",
-    maxSize: 1 * 1024 * 1024, // 1MB
+    maxSize: 2 * 1024 * 1024, // 2MB
     aspectRatio: 4 / 3,
     maxWidth: 1024,
     bucket: "media",
@@ -61,6 +61,13 @@ export const UPLOAD_CONFIGS: Record<string, UploadConfig> = {
     maxSize: 300 * 1024, // 300KB
     aspectRatio: 1 / 1,
     maxWidth: 200,
+    bucket: "avatars",
+  },
+  testimonial_avatar: {
+    label: "Testimonial Avatar",
+    maxSize: 500 * 1024, // 500KB
+    aspectRatio: 1 / 1,
+    maxWidth: 400,
     bucket: "avatars",
   },
 };

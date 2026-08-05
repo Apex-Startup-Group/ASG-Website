@@ -16,6 +16,7 @@ import {
   Handshake,
   Award,
   Milestone,
+  Quote,
 } from "lucide-react";
 
 const NAV = [
@@ -24,6 +25,7 @@ const NAV = [
   { label: "AAL", icon: GraduationCap, path: "/dashboard/aal" },
   { label: "Gallery", icon: Images, path: "/dashboard/gallery" },
   { label: "Blogs", icon: FileText, path: "/dashboard/blogs" },
+  { label: "Testimonials", icon: Quote, path: "/dashboard/testimonials" },
   { label: "Community Members", icon: Users, path: "/dashboard/community" },
   { label: "Industry Partners", icon: Handshake, path: "/dashboard/partners" },
   { label: "Industry Experts", icon: Award, path: "/dashboard/experts" },

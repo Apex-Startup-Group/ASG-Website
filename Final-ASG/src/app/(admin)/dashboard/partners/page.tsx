@@ -399,6 +399,7 @@ export default function IndustryPartnersPage() {
                 uploadType="industry_partner_logo"
                 value={form.logo}
                 onChange={(url) => set("logo", url)}
+                allowFlexibleCrop={true}
               />
             </FormField>
             <FormField label="Description">

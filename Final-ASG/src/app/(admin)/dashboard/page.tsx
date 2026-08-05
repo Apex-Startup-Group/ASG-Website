@@ -96,7 +96,7 @@ export default function DashboardHome() {
       <div
         className="grid gap-4 mb-8"
         style={{
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(200px, 100%), 1fr))",
           opacity: isLoading ? 0.5 : 1,
           transition: "opacity 0.3s"
         }}

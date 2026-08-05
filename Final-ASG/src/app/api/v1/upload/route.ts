@@ -97,10 +97,10 @@ export async function POST(req: Request) {
     }
 
     // 3. Generate Folder Path and UUID Filename:
-    // For 'media' bucket, structure as: {Category}/{year}/{uuid}.webp
-    // For other buckets, structure as: {year}/{month}/{uuid}.webp
+    // Extract year from request payload if provided (e.g. event scheduled date), otherwise default to current year
+    const reqYear = formData.get('year') as string;
     const date = new Date();
-    const year = date.getFullYear();
+    const targetYear = reqYear && !isNaN(parseInt(reqYear)) ? parseInt(reqYear) : date.getFullYear();
     const filename = `${crypto.randomUUID()}.webp`;
     
     let filePath = '';
@@ -109,10 +109,10 @@ export async function POST(req: Request) {
       if (uploadType === 'event_banner') categoryFolder = 'Event';
       else if (uploadType === 'gallery_photo') categoryFolder = 'gallery';
       else if (uploadType === 'blog_cover') categoryFolder = 'blogs';
-      filePath = `${categoryFolder}/${year}/${filename}`;
+      filePath = `${categoryFolder}/${targetYear}/${filename}`;
     } else {
       const month = String(date.getMonth() + 1).padStart(2, '0');
-      filePath = `${year}/${month}/${filename}`;
+      filePath = `${targetYear}/${month}/${filename}`;
     }
 
     // 4. Upload to Supabase Storage

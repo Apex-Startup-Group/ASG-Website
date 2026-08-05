@@ -14,10 +14,10 @@ export function PageHeader({
   action,
 }: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#FF6B00]/10">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#FF6B00]/10 flex-shrink-0">
             {icon}
           </div>
         )}
